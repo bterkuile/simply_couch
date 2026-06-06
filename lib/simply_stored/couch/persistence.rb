@@ -41,7 +41,7 @@ module SimplyStored
       end
 
       def attributes=(hash)
-        hash.each { |attribute, value| self.send "#{attribute}=", value }
+        hash.each { |attribute, value| self.public_send "#{attribute}=", value }
       end
 
       def attributes
@@ -51,8 +51,8 @@ module SimplyStored
         end
       end
 
-      def []=(attribute, value); send("#{attribute}=", value); end
-      def [](attribute); send(attribute); end
+      def []=(attribute, value); public_send("#{attribute}=", value); end
+      def [](attribute); public_send(attribute); end
       def has_key?(key); attributes.has_key?(key); end
       def new?; _rev.nil?; end
       alias_method :new_record?, :new?
@@ -158,9 +158,9 @@ module SimplyStored
           define_accessors(accessors_module_for(owner_clazz), name, options)
         end
 
-        def build(object, json); object.send @setter_name, json[name]; end
-        def changed?(object); object.send("#{name}_changed?"); end
-        def serialize(json, object); json[name] = @type_caster.cast_back object.send(name); end
+        def build(object, json); object.public_send @setter_name, json[name]; end
+        def changed?(object); object.public_send("#{name}_changed?"); end
+        def serialize(json, object); json[name] = @type_caster.cast_back object.public_send(name); end
         alias :value :serialize
 
         private
@@ -195,7 +195,7 @@ module SimplyStored
 
             define_method("#{name}=") do |value|
               typecasted = type_caster.cast(value, options[:type])
-              send("#{name}_will_change!") unless @skip_dirty_tracking || typecasted == send(name)
+              public_send("#{name}_will_change!") unless @skip_dirty_tracking || typecasted == public_send(name)
               instance_variable_set(ivar, typecasted)
             end
 
