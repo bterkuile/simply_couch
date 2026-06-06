@@ -46,7 +46,7 @@ describe "Finder" do
       end
 
       it 'find the last as a reverse first' do
-        expect( User ).to receive(:find).with(:first, order: :desc)
+        expect( User ).to receive(:find).with(:first, {order: :desc})
         User.last
       end
 
