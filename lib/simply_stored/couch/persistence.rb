@@ -270,7 +270,8 @@ module SimplyStored
           def json_create(json)
             return if json.nil?
             doc = ActiveSupport::HashWithIndifferentAccess.new(json)
-            instance = new(:_document => doc)
+            instance = new
+            instance.instance_variable_set(:@_document, doc)
             instance._id = doc[:_id] || doc['_id']
             instance._rev = doc[:_rev] || doc['_rev']
             instance
