@@ -1,4 +1,3 @@
-require "ostruct"
 module SimplyStored
   module Couch
     module Ancestry
@@ -261,7 +260,7 @@ module SimplyStored
         def build_tree(pages = nil)
           pages ||= all
           return pages if pages.empty? # Do not process empty array
-          @tree_wrapper = OpenStruct.new(children: []) # Dummy container as traversing begin, contains roots as children
+          @tree_wrapper = Struct.new(:children).new([]) # Dummy container as traversing begin, contains roots as children
           old_tree_slice = @tree_wrapper.children
           new_tree_slice = []
           pages.sort_by!{|p| [p.path_ids.size, p.position]}
