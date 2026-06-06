@@ -2,7 +2,6 @@
 module SimplyStored
   module Couch
     module EmbeddedIn
-      include SimplyStored::Couch::Properties
 
       def is_embedded_in(name, options = {})
         check_existing_properties(name, SimplyStored::Couch::BelongsTo::Property)

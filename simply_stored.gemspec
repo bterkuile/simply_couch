@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
 
   s.specification_version = 4
 
-  s.add_runtime_dependency(%q<couch_potato>.freeze, [">= 1.7.0"])
   s.add_runtime_dependency(%q<activesupport>.freeze, [">= 0"])
+  s.add_runtime_dependency(%q<activemodel>.freeze, [">= 0"])
+  s.add_runtime_dependency(%q<couchrest>.freeze, [">= 0"])
 end

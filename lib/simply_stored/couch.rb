@@ -1,5 +1,4 @@
 require 'active_model'
-require 'couch_potato'
 
 CouchRest.decode_json_objects = true
 
@@ -24,14 +23,15 @@ require 'simply_stored/couch/has_many_embedded'
 require 'simply_stored/couch/has_and_belongs_to_many'
 require 'simply_stored/couch/has_one'
 require 'simply_stored/couch/pagination'
-require 'simply_stored/couch/ext/couch_potato'
+require 'simply_stored/couch/persistence'
+require 'simply_stored/couch/view'
 require 'simply_stored/couch/views'
 require 'simply_stored/include_relation'
 
 module SimplyStored
   module Couch
     def self.included(clazz)
-      clazz.send(:include, CouchPotato::Persistence)
+      clazz.send(:include, Persistence)
       clazz.send(:include, InstanceMethods)
       clazz.send(:extend, ClassMethods)
 
@@ -46,7 +46,6 @@ module SimplyStored
       include SimplyStored::ClassMethods::Base
       include SimplyStored::Couch::Database
       include SimplyStored::Couch::Validations
-      include SimplyStored::Couch::Properties
       include SimplyStored::Couch::BelongsTo
       include SimplyStored::Couch::EmbeddedIn
       include SimplyStored::Couch::HasMany

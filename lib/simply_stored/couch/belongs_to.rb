@@ -2,7 +2,6 @@
 module SimplyStored
   module Couch
     module BelongsTo
-      include SimplyStored::Couch::Properties
 
       def belongs_to(name, options = {})
         check_existing_properties(name, SimplyStored::Couch::BelongsTo::Property)
