@@ -1,7 +1,7 @@
 module SimplyStored
   module Couch
     module Views
-      class DeletedModelViewSpec < CouchPotato::View::CustomViewSpec
+      class DeletedModelViewSpec < SimplyStored::Couch::View::ModelViewSpec
         def map_function
           <<-eos
             function(doc) {

@@ -1,7 +1,7 @@
 module SimplyStored
   module Couch
     module Views
-      class ArrayPropertyViewSpec < CouchPotato::View::ModelViewSpec
+      class ArrayPropertyViewSpec < SimplyStored::Couch::View::ModelViewSpec
         def map_function
           "function(doc) {
              if(doc.ruby_class && doc.ruby_class == '#{@klass.name}') {
