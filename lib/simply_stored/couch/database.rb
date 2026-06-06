@@ -20,8 +20,14 @@ module SimplyStored
       def full_database_url
         base = couchrest_database_url
         name = database_name
-        # Only append db name if URL doesn't already include it
-        base.include?('/') && !base.match(%r{/[^/]+$}) ? "#{base}/#{name}" : base
+        # Only append db name if URL doesn't already include it.
+        # Skip URL scheme slashes (http://) when checking for existing db name.
+        path_part = base.sub(%r{^https?://}, '')
+        if path_part.include?('/')
+          base  # URL already has a database name
+        else
+          "#{base}/#{name}"
+        end
       end
 
       def database_name
@@ -40,7 +46,8 @@ module SimplyStored
         env_config = config[Rails.env] || config['development']
         db_url = env_config['database'] if env_config.is_a?(Hash)
         # Extract host:port from full URL like http://admin:pass@host:port/dbname
-        db_url&.sub(%r{/[^/]+$}, '')
+        # Strip database name from full URL, skipping URL scheme
+        db_url&.sub(%r{/([^/]+)$}, '') { $1 if $1.include?('.') || $1.length < 15 }
       end
 
       def detect_database_name
@@ -50,7 +57,8 @@ module SimplyStored
         config = YAML.safe_load(ERB.new(File.read(config_path)).result, permitted_classes: [Symbol])
         env_config = config[Rails.env] || config['development']
         db_url = env_config['database'] if env_config.is_a?(Hash)
-        db_url&.match(%r{/([^/]+)$})&.captures&.first
+        return unless db_url
+        URI.parse(db_url).path&.sub('/', '')
       end
     end
 
