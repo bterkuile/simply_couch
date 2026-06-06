@@ -26,4 +26,5 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency(%q<activesupport>, [">= 0"])
   s.add_runtime_dependency(%q<activemodel>, [">= 0"])
+  s.add_development_dependency(%q<couchrest>, [">= 0"])
 end
