@@ -35,7 +35,7 @@ class Array
     relations = {}
     database = nil
     database = relations_arg.last.delete(:database) if relations_arg.last.is_a?(Hash) and relations_arg.last.has_key?(:database)
-    database ||= self.firstdatabase ||= self.class.database.classdatabase ||= self.class.database.database
+    database ||= self.first&.class&.database
 
     # Make sure relations is a Hash, process up to two levels for recursion
     # keys with value nil will not have a followup
