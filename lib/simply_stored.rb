@@ -23,3 +23,4 @@ unless defined?(SimplyStored)
   require 'core_ext/time'
   require 'core_ext/date'
 end
+class SimplyStored::Conflict < StandardError; end
