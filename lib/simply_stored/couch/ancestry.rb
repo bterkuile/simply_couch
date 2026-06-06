@@ -1,3 +1,4 @@
+require "ostruct"
 module SimplyStored
   module Couch
     module Ancestry
