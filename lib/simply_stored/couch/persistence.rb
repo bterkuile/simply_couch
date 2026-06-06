@@ -239,7 +239,7 @@ module SimplyStored
         end
         private
         def clone_attribute(value)
-          if [Integer, Symbol, TrueClass, FalseClass, NilClass, Float, BigDecimal].any? {|k| value.is_a?(k)}
+          if [Integer, Symbol, TrueClass, FalseClass, NilClass, Float].any? {|k| value.is_a?(k)}
             value
           elsif [Hash, Array].include?(value.class)
             Marshal.load(Marshal.dump(value))
@@ -359,7 +359,6 @@ module SimplyStored
           when 'String'   then value.to_s
           when 'Symbol'   then value.to_sym
           when 'TrueClass', 'FalseClass' then !!value
-          when 'BigDecimal' then BigDecimal(value.to_s)
           when 'Array'    then value.is_a?(Array) ? value : [value]
           when 'Hash'     then value.is_a?(Hash) ? value : { value: value }
           when 'Time', 'DateTime', 'Date'
@@ -386,8 +385,7 @@ module SimplyStored
           time:       Time,
           datetime:   DateTime,
           date:       Date,
-          big_decimal: BigDecimal,
-          array:      Array,
+            array:      Array,
           hash:       Hash,
         }.freeze
 
