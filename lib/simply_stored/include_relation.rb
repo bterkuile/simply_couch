@@ -36,6 +36,7 @@ class Array
     database = nil
     database = relations_arg.last.delete(:database) if relations_arg.last.is_a?(Hash) and relations_arg.last.has_key?(:database)
     database ||= self.first&.class&.database
+    raise ArgumentError, "Cannot include relations without a database — pass :database option or ensure models respond to .database" unless database
 
     # Make sure relations is a Hash, process up to two levels for recursion
     # keys with value nil will not have a followup
