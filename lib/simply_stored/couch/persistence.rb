@@ -252,8 +252,8 @@ module SimplyStored
       # ── JSON ─────────────────────────────────────────────────────────────
 
       module Json
-        def to_json(*args); to_hash.to_json(*args); end
-        def to_hash
+        def to_json(*args); to_hash(*args).to_json(*args); end
+        def to_hash(options = nil)
           doc = { 'ruby_class' => self.class.name, '_id' => _id, '_rev' => _rev }.reject { |_, v| v.nil? }.merge(@_document || {})
           (self.class.properties || []).inject(doc) {|d, p| p.serialize(d, self); d }
         end
