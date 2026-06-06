@@ -109,7 +109,7 @@ module SimplyStored
           else
             update_document(document, validate)
           end
-        rescue RestClient::Conflict
+        rescue CouchRest::Conflict
           raise SimplyStored::Conflict.new
         end
       end
