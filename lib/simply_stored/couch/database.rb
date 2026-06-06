@@ -6,7 +6,19 @@ module SimplyStored
       end
 
       def couchrest_database_url
-        nil # override in test/spec helper
+        @_couchrest_database_url || ENV['COUCHDB_URL'] || 'http://127.0.0.1:5984'
+      end
+
+      def couchrest_database_url=(url)
+        @_couchrest_database_url = url
+      end
+
+      def database_name
+        @_database_name || ENV['COUCHDB_DATABASE'] || 'simply_stored_default'
+      end
+
+      def database_name=(name)
+        @_database_name = name
       end
     end
 
@@ -16,7 +28,14 @@ module SimplyStored
       attr_reader :couchrest_database
 
       def initialize(couchrest_database)
-        @couchrest_database = couchrest_database
+        if couchrest_database.is_a?(String)
+          # URL string — create CouchRest database
+          @couchrest_database = CouchRest.database(couchrest_database)
+        elsif couchrest_database.nil?
+          @couchrest_database = CouchRest.database('http://127.0.0.1:5984')
+        else
+          @couchrest_database = couchrest_database
+        end
       end
 
       def view(spec)
