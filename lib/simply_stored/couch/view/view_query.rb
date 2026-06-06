@@ -1,4 +1,3 @@
-require 'rest-client'
 module SimplyStored
   module Couch
     module View
@@ -22,7 +21,7 @@ module SimplyStored
           update_view unless view_has_been_updated?
           begin
             query_view parameters
-          rescue RestClient::NotFound => e
+          rescue CouchRest::NotFound => e
             update_view
             retry
           end
