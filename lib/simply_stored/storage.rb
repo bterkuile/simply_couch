@@ -85,7 +85,7 @@ module SimplyStored
     
     module ClassMethods
       def has_s3_attachment(name, options = {})
-        require 'right_aws'
+        require 'right_aws' rescue nil
         
         name = name.to_sym
         
