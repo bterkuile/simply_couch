@@ -259,6 +259,23 @@ module SimplyStored
         end
         alias :as_json :to_hash
         def _document; @_document ||= {}; end
+
+        def self.included(base)
+          base.extend ClassMethods
+        end
+
+        module ClassMethods
+          # Called by JSON.parse to hydrate documents into model instances.
+          # Looks for 'ruby_class' key (mozo convention) or 'json_class' (standard).
+          def json_create(json)
+            return if json.nil?
+            doc = ActiveSupport::HashWithIndifferentAccess.new(json)
+            instance = new(:_document => doc)
+            instance._id = doc[:_id] || doc['_id']
+            instance._rev = doc[:_rev] || doc['_rev']
+            instance
+          end
+        end
       end
 
       # ── Magic Timestamps ─────────────────────────────────────────────────

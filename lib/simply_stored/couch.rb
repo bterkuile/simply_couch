@@ -1,6 +1,7 @@
 require 'active_model'
 
 CouchRest.decode_json_objects = true
+JSON.create_id = 'ruby_class'
 
 require 'active_support'
 unless {}.respond_to?(:assert_valid_keys)
