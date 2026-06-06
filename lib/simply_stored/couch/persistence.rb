@@ -6,8 +6,6 @@
 module SimplyStored
   module Couch
     module Persistence
-      require 'digest/md5'
-      require 'bigdecimal'
       require 'active_support/time'
 
       def self.included(base)

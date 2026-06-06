@@ -1,3 +1,4 @@
+require 'digest'
 module SimplyStored
   module Couch
     module View
