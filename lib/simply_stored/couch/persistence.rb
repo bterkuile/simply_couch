@@ -211,9 +211,10 @@ module SimplyStored
         include ActiveSupport::Callbacks
 
         included do
-          define_callbacks :validation_on_save, :validation_on_create, :validation_on_update,
+          define_callbacks :validate, :validation,
+                          :validation_on_save, :validation_on_create, :validation_on_update,
                           :save, :create, :update, :destroy
-          %w(save create update destroy).each do |cb|
+          %w(validate validation save create update destroy).each do |cb|
             class_eval <<-RUBY, __FILE__, __LINE__
               def self.before_#{cb}(*args, &block); set_callback :#{cb}, :before, *args, &block; end
               def self.after_#{cb}(*args, &block);  set_callback :#{cb}, :after, *args, &block; end
