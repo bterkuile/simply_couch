@@ -97,7 +97,7 @@ module SimplyStored
         document.database = self
         if validate
           document.errors.clear
-          return false if false == document.run_callbacks(:validation_on_save) do
+          return false if false == document.run_callbacks(:validation) do
             return false if false == document.run_callbacks(:validation_on_create) do
               return false unless valid_document?(document)
             end
@@ -116,7 +116,7 @@ module SimplyStored
       def update_document(document, validate)
         if validate
           document.errors.clear
-          return false if false == document.run_callbacks(:validation_on_save) do
+          return false if false == document.run_callbacks(:validation) do
             return false if false == document.run_callbacks(:validation_on_update) do
               return false unless valid_document?(document)
             end
