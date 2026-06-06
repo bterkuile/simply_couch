@@ -185,7 +185,7 @@ class Callbacker
   before_save ->{ self.counter += 1 }
 
   after_save :raise_error_after_save
-  before_validation_on_save do
+  before_validation do
     errors.add(:base, :oops) if with_validation_error
   end
 

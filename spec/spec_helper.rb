@@ -17,9 +17,9 @@ RSpec.configure do |config|
     $performed_queries = []
     server = CouchRest.new(COUCHDB_URL)
     begin
-      db = server.database(TEST_DB)
-      db.delete!
-    rescue CouchRest::NotFound, CouchRest::PreconditionFailed
+      server.database(TEST_DB).delete!
+    rescue StandardError
+      # database doesn't exist or already deleted
     end
     server.create_db(TEST_DB)
     SimplyStored::Couch::Database.class_eval do
