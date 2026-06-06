@@ -174,8 +174,8 @@ module SimplyStored
 
     def _copy_non_conflicting_attributes(our_attributes, their_attributes)
       their_attributes.each do |attr_name, their_value|
-        if !self.send("#{attr_name}_changed?") && our_attributes[attr_name] != their_value
-          self.send("#{attr_name}=", their_value)
+        if !self.public_send("#{attr_name}_changed?") && our_attributes[attr_name] != their_value
+          self.public_send("#{attr_name}=", their_value)
         end
       end
     end
@@ -192,8 +192,8 @@ module SimplyStored
 
     def _attribute_not_in_conflict?(attr_name, our_value, their_value)
       our_value == their_value || # same
-      !self.send("#{attr_name}_changed?") || # we didn't change
-      self.send("#{attr_name}_changed?") && their_value == self.send("#{attr_name}_was") # we changed and they kept the original
+      !self.public_send("#{attr_name}_changed?") || # we didn't change
+      self.public_send("#{attr_name}_changed?") && their_value == self.public_send("#{attr_name}_was") # we changed and they kept the original
     end
 
     def reset_association_caches
@@ -244,9 +244,9 @@ module SimplyStored
                   foreign_property = self.class.foreign_property
                   foreign_property_without_namespace = foreign_property.to_s.split('__').last
                   if dependent.respond_to?("#{foreign_property}=")
-                    dependent.send("#{foreign_property}=", nil)
+                    dependent.public_send("#{foreign_property}=", nil)
                   elsif dependent.respond_to?("#{foreign_property_without_namespace}=")
-                    dependent.send("#{foreign_property_without_namespace}=", nil)
+                    dependent.public_send("#{foreign_property_without_namespace}=", nil)
                   end
                   dependent.save(false)
                 end
@@ -285,11 +285,11 @@ module SimplyStored
 
       if options[:with_deleted]
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{foreign_key}_with_deleted", view_options))
       else
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{foreign_key}", view_options))
       end
     end
@@ -306,11 +306,11 @@ module SimplyStored
 
       if options[:with_deleted]
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{to.name.singularize.property_name}_with_deleted", view_options))
       else
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{to.name.singularize.property_name}", view_options))
       end
     end
@@ -321,11 +321,11 @@ module SimplyStored
 
       if options[:with_deleted]
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}_with_deleted", view_options))
       else
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}", view_options))
       end
     end
@@ -337,11 +337,11 @@ module SimplyStored
 
       if options[:with_deleted]
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}_with_deleted", view_options))
       else
         self.class.database.view(
-          self.class.get_class_from_name(from).send(
+          self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}", view_options))
       end
     end
