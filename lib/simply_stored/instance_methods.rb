@@ -154,6 +154,7 @@ module SimplyStored
       if _merge_possible?(our_attributes, their_attributes)
         _copy_non_conflicting_attributes(our_attributes, their_attributes)
         self._rev = original._rev
+        @_document['_rev'] = original._rev if @_document # keep CouchDB cache in sync
         true
       else
         @_conflict_information = _conflicting_attributes(our_attributes, their_attributes)

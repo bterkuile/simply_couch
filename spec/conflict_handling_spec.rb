@@ -63,13 +63,7 @@ describe "ConflictHandling" do
     end
 
     it "re-raise the conflict if retried several times" do
-      # Stub Post.database#save_document to raise conflict 3 times, then succeed
-      calls = 0
-      allow( Post.database ).to receive(:save_document) { |*args|
-        calls += 1
-        raise SimplyStored::Conflict.new if calls <= 3
-        true
-      }
+      allow( User.database ).to receive(:save_document).and_raise(SimplyStored::Conflict.new)
 
       copy.name = 'Prof.'
       expect { copy.save }.to raise_error SimplyStored::Conflict
@@ -77,7 +71,7 @@ describe "ConflictHandling" do
 
     it "not try to merge and re-save if auto_conflict_resolution_on_save is disabled" do
       User.auto_conflict_resolution_on_save = false
-      allow( Post.database ).to receive(:save_document).and_raise(SimplyStored::Conflict.new)
+      allow( User.database ).to receive(:save_document).and_raise(SimplyStored::Conflict.new)
 
       copy.name = 'Prof.'
       expect { copy.save }.to raise_error SimplyStored::Conflict
