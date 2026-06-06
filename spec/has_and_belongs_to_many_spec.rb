@@ -544,7 +544,7 @@ describe "has_and_belongs_to_many" do
         server.network_ids = [network.id]
         server.save!
         network.servers(force_reload: true).size.should eq 1
-        expect{ server.delete }.to change{ Vector[Network.count, Server.count] }.by Vector[0, -1]
+        expect{ server.delete }.to change{ Server.count }.by(-1).and change{ Network.count rescue 0 }.by(0)
         network.servers(force_reload: true).size.should eq 0
       end
 
@@ -555,7 +555,7 @@ describe "has_and_belongs_to_many" do
         server.network_ids = [network.id]
         server.save!
         server.networks(force_reload: true).size.should eq 1
-        expect{ network.delete }.to change{ Vector[Network.count, Server.count] }.by Vector[-1, 0]
+        expect{ network.delete }.to change{ Network.count }.by(-1).and change{ Server.count rescue 0 }.by(0)
         server.networks(force_reload: true).size.should eq 0
         server.reload.network_ids.should eq []
       end
