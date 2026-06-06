@@ -35,7 +35,7 @@ class Array
     relations = {}
     database = nil
     database = relations_arg.last.delete(:database) if relations_arg.last.is_a?(Hash) and relations_arg.last.has_key?(:database)
-    database ||= CouchPotato.database
+    database ||= self.class.database
 
     # Make sure relations is a Hash, process up to two levels for recursion
     # keys with value nil will not have a followup
