@@ -334,24 +334,74 @@ module SimplyStored
       # ── Type Caster ──────────────────────────────────────────────────────
 
       class TypeCaster
+        # Cast a value to the given type.
+        # Supports:
+        #   type: SomeClass           — direct class reference
+        #   type: :boolean, :integer  — symbol (lazy, Rails autoloading safe)
+        #   type: 'ClassName'         — string (constantize in Rails)
         def cast(value, type = nil)
           return value unless type
-          return value if type.is_a?(Module) && value.is_a?(type)
-          case type.to_s
-          when 'Date'     then value.is_a?(String) ? Date.parse(value) : value
-          when 'Time', 'DateTime' then value.is_a?(String) ? Time.parse(value) : value
+          resolved = resolve_type(type)
+          # If resolved is a Module (class), try to coerce
+          if resolved.is_a?(Module)
+            return value if value.is_a?(resolved)
+            return cast_to_builtin(value, resolved)
+          end
+          value
+        end
+
+        private
+
+        def cast_to_builtin(value, klass)
+          case klass.name
           when 'Integer'  then value.to_i
           when 'Float'    then value.to_f
-          when 'BigDecimal' then BigDecimal(value.to_s)
           when 'String'   then value.to_s
           when 'Symbol'   then value.to_sym
+          when 'TrueClass', 'FalseClass' then !!value
+          when 'BigDecimal' then BigDecimal(value.to_s)
           when 'Array'    then value.is_a?(Array) ? value : [value]
+          when 'Hash'     then value.is_a?(Hash) ? value : { value: value }
+          when 'Time', 'DateTime', 'Date'
+            value.is_a?(String) ? Time.parse(value) : value
           else value
           end
         end
 
         def cast_back(value)
           value.respond_to?(:iso8601) ? value.iso8601 : value
+        end
+
+        private
+
+        # Map symbols and strings to Ruby classes.
+        # Symbols are preferred — they work without Rails autoloading.
+        BUILTIN_TYPES = {
+          boolean:    [TrueClass, FalseClass],
+          integer:    Integer,
+          float:      Float,
+          string:     String,
+          symbol:     Symbol,
+          time:       Time,
+          datetime:   DateTime,
+          date:       Date,
+          big_decimal: BigDecimal,
+          array:      Array,
+          hash:       Hash,
+        }.freeze
+
+        def resolve_type(type)
+          case type
+          when Symbol
+            mapped = BUILTIN_TYPES[type]
+            mapped || (Object.const_get(type.to_s.classify) rescue type)
+          when String
+            Object.const_get(type) rescue type
+          when Module
+            type
+          else
+            type
+          end
         end
       end
     end
