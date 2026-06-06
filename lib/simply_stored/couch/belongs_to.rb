@@ -70,6 +70,7 @@ module SimplyStored
 
           owner_clazz.class_eval do
             property :"#{name}_id"
+            alias_method :"#{name}_changed?", :"#{name}_id_changed?"
 
             define_method name do |*args|
               local_options = args.last.is_a?(Hash) ? args.last : {}

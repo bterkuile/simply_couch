@@ -235,6 +235,8 @@ module SimplyStored
       module DirtyAttributes
         def self.included(base)
           base.send :include, ActiveModel::Dirty
+          base.send :alias_method, :dirty?, :changed?
+        
           base.class_eval { after_save :clear_changes_information }
         end
         private
