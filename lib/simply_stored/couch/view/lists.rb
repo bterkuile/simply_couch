@@ -7,8 +7,8 @@ module SimplyStored
         end
 
         module ClassMethods
-          def list(name, function)
-            lists[name] = function
+          def list(name, list_function)
+            lists[name] = list_function
           end
 
           def lists(name = nil)
