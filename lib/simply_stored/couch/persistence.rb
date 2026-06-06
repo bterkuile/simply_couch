@@ -368,6 +368,7 @@ module SimplyStored
           end
         end
 
+        public
         def cast_back(value)
           value.respond_to?(:iso8601) ? value.iso8601 : value
         end
