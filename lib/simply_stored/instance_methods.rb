@@ -84,7 +84,7 @@ module SimplyStored
       end
       self._rev = instance._rev
       self._attachments = instance._attachments # CouchDB internal, not a property
-      reset_dirty_attributes
+      clear_changes_information
       reset_association_caches
       self
     end
