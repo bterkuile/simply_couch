@@ -23,7 +23,7 @@ module SimplyStored
         base.send :include, View::Lists
 
         base.class_eval do
-          attr_accessor :_id, :_rev, :_deleted, :database
+          attr_accessor :_id, :_rev, :_deleted, :_attachments, :database
           alias_method :id, :_id
           alias_method :id=, :_id=
         end

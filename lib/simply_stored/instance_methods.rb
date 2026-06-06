@@ -83,7 +83,7 @@ module SimplyStored
         send "#{attribute}=", value
       end
       self._rev = instance._rev
-      self["_attachments"] = instance["_attachments"] # bypass ActiveModel strictness
+      self._attachments = instance._attachments # CouchDB internal, not a property
       reset_dirty_attributes
       reset_association_caches
       self
