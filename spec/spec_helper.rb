@@ -21,7 +21,7 @@ RSpec.configure do |config|
     rescue StandardError
       # database doesn't exist or already deleted
     end
-    server.create_db(TEST_DB)
+    begin; server.create_db(TEST_DB); rescue RestClient::PreconditionFailed, CouchRest::PreconditionFailed, CouchRest::NotFound; end
     SimplyStored::Couch::Database.class_eval do
       define_method(:couchrest_database_url) { "#{COUCHDB_URL}/#{TEST_DB}" }
     end
