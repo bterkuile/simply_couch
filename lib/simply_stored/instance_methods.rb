@@ -45,9 +45,9 @@ module SimplyStored
       else
         if self.class.soft_deleting_enabled? && deleted?
           # really deleting a previously soft-deleted object - skipping callbacks
-          CouchPotato.database.destroy_document(self, false)
+          self.class.database.destroy_document(self, false)
         else # deleting a normal object or a soft-deletable object that was not soft-deleted before
-          CouchPotato.database.destroy_document(self, true)
+          self.class.database.destroy_document(self, true)
         end
         freeze
       end
@@ -122,12 +122,12 @@ module SimplyStored
       begin
         _reset_conflict_information
         blk.call
-      rescue CouchPotato::Conflict => e
+      rescue SimplyStored::Conflict => e
         if self.class.auto_conflict_resolution_on_save && retry_count < max_retries && try_to_merge_conflict
           retry_count += 1
           retry
         else
-          _decorate_with_conflict_details(e) if e.is_a?(CouchPotato::Conflict)
+          _decorate_with_conflict_details(e) if e.is_a?(SimplyStored::Conflict)
           raise e
         end
       end
