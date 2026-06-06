@@ -56,29 +56,29 @@ describe "ConflictHandling" do
       original.save.should be true
 
       copy.name = 'Prof.'
-      expect { copy.save }.to raise_error CouchPotato::Conflict
+      expect { copy.save }.to raise_error SimplyStored::Conflict
 
       copy.name.should eq "Prof."
       copy.reload.name.should eq "Pluto"
     end
 
     it "re-raise the conflict if retried several times" do
-      exception = CouchPotato::Conflict.new
+      exception = SimplyStored::Conflict.new
       #CouchPotato.database.expects(:save_document).raises(exception).times(3)
       expect( CouchPotato.database ).to receive(:save_document).exactly(3).times.and_raise exception
 
       copy.name = 'Prof.'
-      expect { copy.save }.to raise_error CouchPotato::Conflict
+      expect { copy.save }.to raise_error SimplyStored::Conflict
     end
 
     it "not try to merge and re-save if auto_conflict_resolution_on_save is disabled" do
       User.auto_conflict_resolution_on_save = false
-      exception = CouchPotato::Conflict.new
+      exception = SimplyStored::Conflict.new
       #CouchPotato.database.expects(:save_document).raises(exception).times(1)
       expect( CouchPotato.database ).to receive(:save_document).once.and_raise exception
 
       copy.name = 'Prof.'
-      expect { copy.save }.to raise_error CouchPotato::Conflict
+      expect { copy.save }.to raise_error SimplyStored::Conflict
     end
 
     context "with conflict information" do
@@ -90,7 +90,7 @@ describe "ConflictHandling" do
         copy.name = 'Prof.'
         begin
           copy.save
-        rescue CouchPotato::Conflict => e
+        rescue SimplyStored::Conflict => e
           e.message.should eq '409 Conflict - conflict on attributes: ["name"]'
         end
       end
@@ -105,14 +105,14 @@ describe "ConflictHandling" do
         copy.name = 'Prof.'
         begin
           copy.save.should be true
-        rescue CouchPotato::Conflict => e
+        rescue SimplyStored::Conflict => e
           e.message.should eq '409 Conflict - conflict on attributes: ["name"]'
         end
 
         other_copy.title = 'Prof.'
         begin
           other_copy.save
-        rescue CouchPotato::Conflict => e
+        rescue SimplyStored::Conflict => e
           e.message.should eq '409 Conflict - conflict on attributes: ["title"]'
         end
       end

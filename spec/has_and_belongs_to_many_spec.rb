@@ -538,7 +538,7 @@ describe "has_and_belongs_to_many" do
 
     context "with deleted" do
       it "not fetch deleted objects" do
-        require 'matrix'
+        # matrix gem removed in Ruby 3.4; skipping
         network = Network.create(klass: "A")
         server = Server.new
         server.network_ids = [network.id]
@@ -549,7 +549,7 @@ describe "has_and_belongs_to_many" do
       end
 
       it "not fetch deleted objects - from both directions" do
-        require 'matrix'
+        # matrix gem removed in Ruby 3.4; skipping
         network = Network.create(klass: "A")
         server = Server.new
         server.network_ids = [network.id]

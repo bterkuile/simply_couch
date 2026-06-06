@@ -27,7 +27,7 @@ describe "BelongsTo" do
       end
 
       it "create a property for the foreign key attribute" do
-        Post.properties.any?{|p| p.is_a?(CouchPotato::Persistence::SimpleProperty) && p.name.to_s == 'user_id'}.should be true
+        Post.properties.any?{|p| p.is_a?(SimplyStored::Couch::SimpleProperty) && p.name.to_s == 'user_id'}.should be true
       end
 
       it "notice a change to the foreign key attribute in dirty checks" do
