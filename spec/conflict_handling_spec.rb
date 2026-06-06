@@ -63,9 +63,13 @@ describe "ConflictHandling" do
     end
 
     it "re-raise the conflict if retried several times" do
-      exception = SimplyStored::Conflict.new
-      #CouchPotato.database.expects(:save_document).raises(exception).times(3)
-      expect( CouchPotato.database ).to receive(:save_document).exactly(3).times.and_raise exception
+      # Stub Post.database#save_document to raise conflict 3 times, then succeed
+      calls = 0
+      allow( Post.database ).to receive(:save_document) { |*args|
+        calls += 1
+        raise SimplyStored::Conflict.new if calls <= 3
+        true
+      }
 
       copy.name = 'Prof.'
       expect { copy.save }.to raise_error SimplyStored::Conflict
@@ -73,9 +77,7 @@ describe "ConflictHandling" do
 
     it "not try to merge and re-save if auto_conflict_resolution_on_save is disabled" do
       User.auto_conflict_resolution_on_save = false
-      exception = SimplyStored::Conflict.new
-      #CouchPotato.database.expects(:save_document).raises(exception).times(1)
-      expect( CouchPotato.database ).to receive(:save_document).once.and_raise exception
+      allow( Post.database ).to receive(:save_document).and_raise(SimplyStored::Conflict.new)
 
       copy.name = 'Prof.'
       expect { copy.save }.to raise_error SimplyStored::Conflict
