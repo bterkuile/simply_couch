@@ -336,7 +336,7 @@ module SimplyStored
       class TypeCaster
         def cast(value, type = nil)
           return value unless type
-          return value if value.is_a?(type)
+          return value if type.is_a?(Module) && value.is_a?(type)
           case type.to_s
           when 'Date'     then value.is_a?(String) ? Date.parse(value) : value
           when 'Time', 'DateTime' then value.is_a?(String) ? Time.parse(value) : value
