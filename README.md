@@ -1,108 +1,59 @@
 # SimplyCouch
 
-Simple CouchDB ORM with an ActiveRecord-like syntax.
+[![Gem Version](https://badge.fury.io/rb/simply_couch.svg)](https://rubygems.org/gems/simply_couch)
+[![License](https://img.shields.io/badge/license-BSD--2--Clause-blue.svg)](LICENSE.txt)
 
-Zero driver dependencies — your app brings its own CouchDB client (couchrest, couchbase, etc.).
-ActiveModel-compliant, supports associations, validations, callbacks, views, soft delete, S3 attachments, pagination, and more.
+**Simple CouchDB ORM for Rails** — ActiveModel-compliant, driver-agnostic.
 
-SimplyCouch has also support for S3 attachments.
+Zero driver dependencies. Your app brings its own CouchDB client (couchrest, couchbase, etc.).
 
-See also [RockingChair](http://github.com/jweiss/rocking_chair) on how to speed-up your unit tests
-by using an in-memory CouchDB backend.
+## History
 
-More examples on how to work with SimplyCouch can be found [here](http://github.com/jweiss/simply_couch_examples)
+SimplyCouch is based on **[simply_stored](https://github.com/peritor/simply_stored)** (140 ★), created by [Mathias Meyer](https://github.com/roidrage) and [Jonathan Weiss](https://github.com/jweiss) at [Peritor Consulting](https://github.com/peritor) in Berlin (~2010). simply_stored was a convenience layer on top of [CouchPotato](https://github.com/langalex/couch_potato).
 
-This fork
-------------
-This fork of SimplyCouch adds some extras to the standard version. A list of this is:
+This fork evolved over a decade with substantial additions — pagination, ancestry trees, embedded documents, include relations, multi-database support, and a migration toward ActiveModel. In 2026, the CouchPotato dependency was fully removed (~930 lines of view system + persistence ported directly into the gem), couchrest was removed from the gemspec, and the gem was renamed to **SimplyCouch** as its own project.
 
-* Pagination, use: Person.all(:page => params[:page], :per\_page => 40) out of the box
-* Namespace support, there is working namespace support. It is still in the child phase, but works for me
-* Embedded documents. Embed documents but the orm should just work similar (Speedup choice)
-* Include relations, Advanced relation including, reducing number of queries (Huge speedup for relations)
-* Ancestry for tree structures
-* Multi-database support
-* Rails 3.1, ruby 1.9.2 tested
-* Moving towards ActiveModel, phasing out other/older libraries
+**Where are the original authors?** Jonathan Weiss (jweiss) co-founded Scalarium and is active in the Berlin tech scene. Mathias Meyer (roidrage) moved to Amazon Web Services Germany. Peritor's [webistrano](https://github.com/peritor/webistrano) (868 ★) was widely used in the Capistrano era.
 
-Installation
-------------
-Add the following to your bundle file
-    gem 'simply_couch', :git => 'git://github.com/bterkuile/simply_couch.git'
-
-#### Using with Rails
-
-Create a config/couchdb.yml:
-
-```yml
-default: &default
-  validation_framework: :active_model # optional
-  split_design_documents_per_view: true # optional
-
-development:
-  <<: *default
-  database: http://localhost:5984/development_db
-test:
-  <<: *default
-  database: http://localhost:5984/test_db
-production:
-  <<: *default
-  database: <%= ENV['DB_NAME'] %>
-```
-
-#### Rails 3.1.x
-
-Add to your Gemfile:
+## Installation
 
 ```ruby
-# gem 'rails' # we don't want to load activerecord so we can't require rails
-gem 'railties'
-gem 'actionpack'
-gem 'actionmailer'
-gem 'activemodel'
-gem 'simply_couch', :require => 'simply_couch/couch'
+gem 'simply_couch'
 ```
 
-Please also see the installation info of [CouchPotato](https://github.com/langalex/couch_potato)
-
-Usage
--------------
-
-Require SimplyCouch:
+Or from git:
 
 ```ruby
-require 'simply_couch'
-CouchPotato::Config.database_name = "http://example.com:5984/name_of_the_db"
+gem 'simply_couch', git: 'https://github.com/bterkuile/simply_couch.git'
 ```
 
-From now on you can define classes that use SimplyCouch.
+You must also add a CouchDB client to your Gemfile (the gem doesn't force one):
 
-Intro
--------------
+```ruby
+gem 'couchrest'  # or couchbase, or any CouchDB HTTP client
+```
 
-SimplyCouch auto-generates views for you and handles all the serialization and de-serialization stuff.
+## Quick Start
 
 ```ruby
 class User
-  include SimplyCouch::Couch
+  include SimplyCouch::Model
 
-  property :login
-  property :age
-  property :accepted_terms_of_service, :type => :boolean
-  property :last_login, :type => Time
+  property :name
+  property :email
+  property :active, type: Boolean
+  property :last_login, type: Time
+  property :tags, type: Array
+
+  has_many :posts
+  belongs_to :company
+
+  view :by_name, key: :name
+  view :active_by_created, key: :created_at, conditions: 'doc.active == true'
 end
 
-user = User.new(:login => 'Bert', :age => 12, :accepted_terms_of_service => true, :last_login = Time.now)
-user.save
-
-User.find_by_age(12).login
-# => 'Bert'
-
-User.all
-# => [user]
-
 class Post
-  include SimplyCouch::Couch
+  include SimplyCouch::Model
 
   property :title
   property :body
@@ -110,325 +61,234 @@ class Post
   belongs_to :user
 end
 
-class User
-  has_many :posts
-end
+# CRUD
+user = User.create(name: 'Alice', email: 'alice@example.com', active: true)
+user.update(name: 'Alice B.')
+user.destroy
 
-post = Post.create(:title => 'My first post', :body => 'SimplyCouch is so nice!', :user => user)
+# Queries
+User.find_by_name('Alice')
+User.find_all_by_active(true)
+User.active_by_created(descending: true)
+User.all(page: 1, per_page: 40)
 
-user.posts
-# => [post]
-
-Post.find_all_by_title_and_user_id('My first post', user.id).first.body
-# => 'SimplyCouch is so nice!'
-
-post.destroy
-
-user.posts(:force_reload => true)
-# => []
+# Associations
+user.posts                     # => [Post, ...]
+user.posts(limit: 5, order: :desc)
+user.post_count                # => 42
 ```
 
-Associations
--------------
+## Features
 
-The supported associations are: belongs_to, has_one, has_many, has_many :through, and has_and_belongs_to_many:
+### Properties & Type Casting
 
-    class Post
-      include SimplyCouch::Couch
+```ruby
+property :name
+property :age,        type: Integer
+property :price,      type: Float
+property :active,     type: Boolean   # stored as true/false
+property :last_login, type: Time
+property :tags,       type: Array
+property :metadata,   type: Hash
+```
 
-      property :title
-      property :body
+### Associations
 
-      has_many :posts, :dependent => :destroy
-      has_many :users, :through => :posts
-      belongs_to :user
-    end
+`belongs_to`, `has_many`, `has_many_embedded`, `has_and_belongs_to_many`, `has_one`, `embedded_in`.
 
-    class Comment
-      include SimplyCouch::Couch
+```ruby
+class Post
+  include SimplyCouch::Model
+  has_many :comments, dependent: :destroy
+  has_many :authors, through: :comments, source: :user
+  belongs_to :category
+end
 
-      property :body
+class User
+  include SimplyCouch::Model
+  has_and_belongs_to_many :networks, storing_keys: true
+end
+```
 
-      belongs_to :post
-      belongs_to :user
-    end
+### Validations
 
-    post = Post.create(:title => 'Look ma!', :body => 'I can have comments')
-
-    mike = User.create(:login => 'mike')
-    mikes_comment = Comment.create(:user => mike, :post => post, :body => 'Wow, comments are nice')
-
-    john = User.create(:login => 'john')
-    johns_comment = Comment.create(:user => john, :post => post, :body => 'They are indeed')
-
-    post.comments
-    # => [mikes_comment, johns_comment]
-
-    post.comments(:order => :desc)
-    # => [johns_comment, mikes_comment]
-
-    post.comments(:limit => 1)
-    # => [mikes_comment]
-
-    post.comment_count
-    # => 2
-
-    post.users
-    # => [mike, john]
-
-    post.user_count
-    # => 2
-
-  n:m relations where the IDs are stored on one part as an array:
-
-    class Server
-      include SimplyCouch::Couch
-
-      property :hostname
-
-      has_and_belongs_to_many :networks, :storing_keys => true
-    end
-
-    class Network
-      include SimplyCouch::Couch
-
-      property :klass
-
-      has_and_belongs_to_many :servers, :storing_keys => false
-    end
-
-    network = Network.create(:klass => "A")
-    server = Server.new(:hostname => 'www.example.com')
-    network.add_server(server)
-    server.network_ids # => [network.id]
-    network.servers # => [server]
-    server.networks # => [network]
-
-  The array property holding the IDs of the other item will be used to constuct two view to lookup
-  the other part. Soft deleting is only supported on the class holding the IDs.  
-
-Custom Associations
--------------
-
-    class Document
-      include SimplyCouch::Couch
-
-      belongs_to :creator, :class_name => "User"
-      belongs_to :updater, :class_name => "User"
-    end
-
-    d = Document.new
-    d.creator = User.first
-
-
-Validations
--------------
-
-Validations are handled by ActiveModel, There are two exceptions:
-
-1. The uniqueness validator
-2. The containment validator
-
-The containment validator checks wether an array property is contained within a specified set
+Standard ActiveModel validations plus a `containment` validator for array properties:
 
 ```ruby
 class Page
-  include SimplyCouch::Couch
-
+  include SimplyCouch::Model
   property :categories
-
-  validates_containment_of :categories, in: %[one two three]
+  validates_containment_of :categories, in: %w[news blog docs]
 end
-
-Page.new.valid? #=> true
-Page.new(categories: %w[one three]).valid? #=> true
-Page.new(categories: %w[one four]).valid? #=> false
 ```
 
-S3 Attachments
--------------
+### Callbacks
 
-SimplyCouch supports storing large attachments in Amazon S3.
-It uses RightAWS for the interaction with the EC2 API:
+`before_save`, `after_save`, `before_create`, `after_create`, `before_destroy`, `after_destroy` — all standard ActiveModel callbacks.
+
+### Views
+
+CouchDB views are auto-generated from your model's property declarations. JavaScript only (Erlang dropped in 2026 port).
 
 ```ruby
-class Log
-  include SimplyCouch::Couch
-  has_s3_attachment :data, :bucket => 'the-bucket-name',
-                           :access_key => 'my-AWS-key-id',
-                           :secret_access_key => 'psst!-secret',
-                           :location => :eu,
-                           :after_delete => :delete,
-                           :logger => Logger.new('/dev/null')
-
-end
-
-log = Log.new
-log.data = File.read('/var/log/messages')
-log.save
-# => true
-
-log.data_size
-# => 11238132
+view :by_status, key: :status
+view :published, key: :created_at, conditions: 'doc.status == "published"'
+view :by_tags, key: :tags  # array properties work too
 ```
-This will create an item on S3 in the specified bucket. The item will use the ID of the log object as the key and the body will be the data attribute. This way you can store big files outside of CouchDB.
 
+Custom views and raw map/reduce are supported via view spec classes.
 
-Soft delete
--------------
+### Pagination
 
-SimplyCouch also has support for "soft deleting" - much like acts_as_paranoid. Items will then not be deleted but only marked as deleted. This way you can recover them later.
+```ruby
+Post.all(page: 2, per_page: 25)
+User.active_by_created(page: 1, per_page: 50, descending: true)
+```
 
-**NOTE: Not tested for a long time (@bterkuile 2014-11-10)**
+### Soft Delete
+
 ```ruby
 class Document
-  include SimplyCouch::Couch
-
-  property :title
-  enable_soft_delete # will use :deleted_at attribute by default
+  include SimplyCouch::Model
+  enable_soft_delete  # defaults to :deleted_at
 end
 
-doc = Document.create( title: 'secret project info' )
-Document.find_all_by_title('secret project info')
-# => [doc]
-
+doc = Document.create(title: 'draft')
 doc.destroy
-
-Document.find_all_by_title('secret project info')
-# => []
-
-Document.find_all_by_title('secret project info', with_deleted: true)
-# => [doc]
+Document.all                          # => [] (soft-deleted filtered out)
+Document.all(with_deleted: true)      # => [doc] (recoverable)
 ```
 
-CouchDB - Auto resolution of conflicts on save
+### Ancestry (Tree Structures)
 
-SimplyCouch now by default retries conflicted save operations if it is possible to resolve the conflict.
-Solving the conflict means that if updated were done one different attributes the local object will
-refresh those attributes and try to save again. This will be tried two times by default. Afterwards the conflict
-exception will be re-raised.
-
-This feature can be controlled on the class level like this:
-    User.auto_conflict_resolution_on_save = true | false
-
-If auto_conflict_resolution_on_save is enabled, something like this will work:
 ```ruby
-class Document
-  include SimplyCouch::Couch
-
+class Page
+  include SimplyCouch::Model
   property :title
-  property :content
-end
-
-original = Document.create(:title => 'version 1', :content => 'Hi there')
-
-other_client = Document.find(original.id)
-
-original.title = 'version 2'
-original.save!
-
-other_client.content = 'A better version'
-other_client.save!  # -> this line would fail without auto_conflict_resolution_on_save
-
-other_client.title
-# => 'version 2'
-```
-
-Ancestry
---------
-Ancestry is the ability to use tree formed structures.
-Since CouchDB is a map/reduce system, creating tree structures is a different technique than the ones apply
-by nested set like solution. Given the parent_id approach and many requests to the server always works, it is
-far from ideal. Instead this approach uses map reduce to help with fancy queries. Here a short overview:
-
-Example ancestry model, a nested directory structure:
-```ruby
-class Directory
-  include SimplyCouch::Couch
-
-  property :name
-
   has_ancestry
 end
+
+# Build trees
+parent = Page.create(title: 'Products')
+child = Page.create(title: 'Widgets', parent: parent)
+
+# Query trees
+Page.roots                    # pages with no parent
+Page.full_tree                # entire tree loaded in one query
+parent.children               # direct children
+parent.descendants            # all descendants (flattened)
+child.ancestors               # path to root
+
+# Scoped trees (different trees per property)
+has_ancestry by_property: :locale
 ```
-The `has_ancestry` adds two properties:
-* `path_ids` giving the ids of all the parents
-* `position` indicating the position within the siblings
 
-Do not edit these properties directly!
+### Dynamic Finders
 
-### Fetching the full directory structure at once:
 ```ruby
-directories = Directory.full_tree # Loads all pages from database and organizes them into a tree
-directories.each do |directory|
-  puts directory.tree_depth #=> 0
+User.find_by_name('Alice')
+User.find_all_by_active(true)
+User.count_by_active(true)
+```
 
-  # subdirectories in the children attribute
-  directory.children.each do |subdirectory|
-    puts subdirectory.tree_depth #=> 1
-  end
+### Include Relations
+
+Eager-load associations to avoid N+1 queries on CouchDB:
+
+```ruby
+Post.all(include: :user)              # loads users with posts
+Post.all(include: [:user, :comments]) # multiple associations
+```
+
+### Conflict Resolution
+
+Auto-merge on CouchDB conflicts by default (can be disabled):
+
+```ruby
+User.auto_conflict_resolution_on_save = false  # disable
+```
+
+### Multi-Database Support
+
+```ruby
+class ArchivedPost
+  include SimplyCouch::Model
+  use_database 'http://couchdb:5984/archive'
 end
 ```
 
-### Fetching all descendants of a specific directory:
-```ruby
-Directory.roots #=> [Array with directories not having a parent, can be handy for website menus]
-directory  = Directory.find("dir-Pictures")
-directory.descendants #=> [all directories below as a flattened array]
-directory.subtree #=> [array of children of the directory, but with full subtree already fetched]
-```
+### Design Document Splitting
 
-### Fetching ancestors parents
-```ruby
-directory.parent_ids #=> [array of ids of the parents]
-directory.parents #=> [optimized getter for parent objects as array]
-directory.ancestors #=> alias for parents
-```
-
-### Assignment
-Creating the tree structure can be done by setting parent or children:
+Prevent full view reindexing when adding a new view:
 
 ```ruby
-dir1_1.parent = dir1
-dir1_1.parent_id = dir1.iod
-dir1.children = [dir1_1]
-dir1.add_child dir1_1
-```
+class Post
+  include SimplyCouch::Model
+  split_design_documents_per_view  # each view → own _design doc
 
-### Scoping by other property
-When you want a different tree for a different language in your website, you might want to use ancesty as well. Different languages have different trees however. This is supported:
-```ruby
-class Page
-  include SimplyCouch::Couch
-
-  has_ancestry by_property: :locale
+  view :by_user_id, key: :user_id   # → _design/Post_view_by_user_id
+  view :by_status,  key: :status    # → _design/Post_view_by_status
 end
 ```
-Now trees are scoped by the local column. The [cmtool cms](https://github.com/bterkuile/cmtool) makes use of this feature.
 
-### Bonus an example used together with the [cmtool cms](https://github.com/bterkuile/cmtool) to build a [zurb-foundation](http://foundation.zurb.com/docs/components/topbar.html) menu in [slim](http://slim-lang.com/):
-```slim
-.fixed: nav.top-bar.fixed data-topbar="" role="navigation"
-  section.top-bar-section
-    ul.left= render partial: "application/menu_item", collection: Page.full_tree
+Without splitting, changing any view reindexes all views. On large databases, this can take hours.
+With splitting, only the new/changed view reindexes.
+
+### Attachments
+
+SimplyCouch supports **two** attachment strategies — use the one that fits your use case:
+
+#### 1. CouchDB Native Inline Attachments
+
+```ruby
+class Invoice
+  include SimplyCouch::Model
+  include SimplyCouch::Model::Attachments
+end
+
+invoice.put_attachment('receipt.pdf', file, content_type: 'application/pdf')
+invoice.fetch_attachment('receipt.pdf')
+invoice.delete_attachment('receipt.pdf')
+invoice.attachment_names  # => ['receipt.pdf', 'logo.png']
 ```
-having `app/views/application/_menu_item.html.slim`
-```slim
-- if menu_item.in_menu?
-  - if menu_item.children.any?
-    li.has-dropdown.not-click
-      a href=page_path(menu_item.name) = menu_item.title.presence || menu_item.name
-      ul.dropdown= render partial: 'application/menu_item', collection: menu_item.children
-  - else
-    li
-      a href=page_path(menu_item.name) = menu_item.title.presence || menu_item.name
+
+Attachments are stored inline in the CouchDB document — atomic, no extra storage, replicable.
+
+#### 2. ActiveStorage Compatibility
+
+*Coming soon — `has_one_attached` / `has_many_attached` backed by CouchDB attachments.*
+
+See `docs/attachments.md` for a detailed comparison of approaches.
+
+### Legacy: S3 Attachments
+
+The `has_s3_attachment` method (using RightAws) exists but is **unmaintained and untested**.
+It was part of the original simply_stored and has not been verified in years. Use CouchDB
+native attachments or ActiveStorage instead.
+
+## Dependencies
+
+| Gem | Version | Notes |
+|-----|---------|-------|
+| activemodel | >= 6.0 | Validations, callbacks, dirty tracking |
+| activesupport | >= 6.0 | Inflections, callbacks, concern |
+
+**No CouchDB driver dependency.** Add `couchrest` or `couchbase` to your app's Gemfile.
+
+## Testing
+
+Uses RSpec with an in-memory CouchDB via [RockingChair](https://github.com/jweiss/rocking_chair).
+
+```bash
+bundle exec rspec
 ```
-License
--------------
 
-SimplyCouch is licensed under the OpenBSD / two-clause BSD license, modeled after the ISC license. See LICENSE.txt
+## License
 
-About
--------------
+BSD 2-Clause — see [LICENSE.txt](LICENSE.txt)
 
-SimplyCouch was written by [Mathias Meyer](http://twitter.com/roidrage) and [Jonathan Weiss](http://twitter.com/jweiss) for [Peritor](http://www.peritor.com).
+## Credits
+
+- **Original simply_stored:** [Mathias Meyer](https://github.com/roidrage) & [Jonathan Weiss](https://github.com/jweiss) at [Peritor Consulting](https://github.com/peritor)
+- **Fork & simply_couch:** [Benjamin ter Kuile](https://github.com/bterkuile)
+- **CouchPotato removal + 2026 port:** BenClaw & Benjamin ter Kuile
