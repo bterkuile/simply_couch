@@ -6,7 +6,7 @@ module SimplyCouch
           if @_couchrest_database_url
             DatabaseInstance.new(full_database_url)
           else
-            SimplyCouch.couch_database
+            SimplyCouch.database
           end
         end
       end
