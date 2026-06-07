@@ -82,7 +82,7 @@ module SimplyCouch
         if respond_to?(:database) && database.respond_to?(:couchrest_database)
           database.couchrest_database
         else
-          self.class.database.couchrest_database
+          self.class.couch_database.couchrest_database
         end
       end
     end

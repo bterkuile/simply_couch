@@ -167,7 +167,7 @@ module SimplyCouch
     end
 
     def self.delete_all_design_documents(database)
-      db = CouchRest.database(database)
+      db = CouchRest.couch_database(database)
       db.info # ensure DB exists
       design_docs = CouchRest.get("#{database}/_all_docs?startkey=%22_design%22&endkey=%22_design0%22")['rows'].map do |row|
         [row['id'], row['value']['rev']]
@@ -179,7 +179,7 @@ module SimplyCouch
     end
 
     def self.compact_all_design_documents(database)
-      db = CouchRest.database(database)
+      db = CouchRest.couch_database(database)
       db.info # ensure DB exists
       design_docs = CouchRest.get("#{database}/_all_docs?startkey=%22_design%22&endkey=%22_design0%22")['rows'].map do |row|
         [row['id'], row['value']['rev']]

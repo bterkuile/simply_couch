@@ -16,7 +16,7 @@ module SimplyCouch
       validate = validate[:validate] if validate.is_a?(Hash) && validate.has_key?(:validate)
       result = retry_on_conflict do
         retry_on_connection_error do
-          self.class.database.save_document(self, validate)
+          self.class.couch_database.save_document(self, validate)
         end
       end
       # ActiveModel implementations
@@ -28,7 +28,7 @@ module SimplyCouch
     def save!
       result = retry_on_conflict do
         retry_on_connection_error do
-          self.class.database.save_document!(self)
+          self.class.couch_database.save_document!(self)
         end
       end
       # ActiveModel implementations
@@ -45,9 +45,9 @@ module SimplyCouch
       else
         if self.class.soft_deleting_enabled? && deleted?
           # really deleting a previously soft-deleted object - skipping callbacks
-          self.class.database.destroy_document(self, false)
+          self.class.couch_database.destroy_document(self, false)
         else # deleting a normal object or a soft-deletable object that was not soft-deleted before
-          self.class.database.destroy_document(self, true)
+          self.class.couch_database.destroy_document(self, true)
         end
         freeze
       end
@@ -284,11 +284,11 @@ module SimplyCouch
       view_options = _default_view_options(options)
 
       if options[:with_deleted]
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{foreign_key}_with_deleted", view_options))
       else
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{foreign_key}", view_options))
       end
@@ -305,11 +305,11 @@ module SimplyCouch
       view_options[:include_docs] = false
 
       if options[:with_deleted]
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{to.name.singularize.property_name}_with_deleted", view_options))
       else
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_belongs_to_#{to.name.singularize.property_name}", view_options))
       end
@@ -320,11 +320,11 @@ module SimplyCouch
       view_options = _default_view_options(options)
 
       if options[:with_deleted]
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}_with_deleted", view_options))
       else
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}", view_options))
       end
@@ -336,11 +336,11 @@ module SimplyCouch
       view_options[:include_docs] = false
 
       if options[:with_deleted]
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}_with_deleted", view_options))
       else
-        self.class.database.view(
+        self.class.couch_database.view(
           self.class.get_class_from_name(from).public_send(
             "association_#{from.to_s.singularize.property_name}_has_and_belongs_to_many_#{to.name.pluralize.property_name}", view_options))
       end

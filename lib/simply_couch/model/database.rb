@@ -1,12 +1,12 @@
 module SimplyCouch
   module Model
     module Database
-      def database
+      def couch_database
         @_simply_couch_database ||= begin
           if @_couchrest_database_url
             DatabaseInstance.new(full_database_url)
           else
-            SimplyCouch.database
+            SimplyCouch.couch_database
           end
         end
       end
@@ -76,9 +76,9 @@ module SimplyCouch
       def initialize(couchrest_database)
         if couchrest_database.is_a?(String)
           # URL string — create CouchRest database
-          @couchrest_database = CouchRest.database(couchrest_database)
+          @couchrest_database = CouchRest.couch_database(couchrest_database)
         elsif couchrest_database.nil?
-          @couchrest_database = CouchRest.database('http://127.0.0.1:5984')
+          @couchrest_database = CouchRest.couch_database('http://127.0.0.1:5984')
         else
           @couchrest_database = couchrest_database
         end
@@ -98,7 +98,7 @@ module SimplyCouch
         ).query_view!(spec.view_parameters)
         processed_results = spec.process_results results
         processed_results.each do |document|
-          document.database = self if document.respond_to?(:database=)
+          document.couch_database = self if document.respond_to?(:database=)
         end if processed_results.respond_to?(:each)
         processed_results
       end
@@ -127,7 +127,7 @@ module SimplyCouch
       def load_document(id)
         raise "Can't load a document without an id (got nil)" if id.nil?
         instance = couchrest_database.get(id)
-        instance.database = self if instance.respond_to?(:database=)
+        instance.couch_database = self if instance.respond_to?(:database=)
         instance
       end
 
@@ -148,7 +148,7 @@ module SimplyCouch
       def bulk_load(ids)
         response = couchrest_database.bulk_load ids
         docs = response['rows'].map{|row| row["doc"]}.compact
-        docs.each{|doc| doc.database = self if doc.respond_to?(:database=) }
+        docs.each{|doc| doc.couch_database = self if doc.respond_to?(:database=) }
         docs
       end
 
@@ -159,7 +159,7 @@ module SimplyCouch
       private
 
       def create_document(document, validate)
-        document.database = self
+        document.couch_database = self
         if validate
           document.errors.clear
           return false if false == document.run_callbacks(:validation) do
