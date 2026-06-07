@@ -6,15 +6,22 @@ module SimplyCouch
   # Set once at boot:
   #   SimplyCouch.database_url = "http://admin:pass@localhost:5984/mozo_development"
   #
-  # Override per-request (multi-tenant):
-  #   SimplyCouch::Current.couch_database = SimplyCouch.database_for("http://.../other_db")
+  # Per-request override (multi-tenant):
+  #   Define a top-level Current class in your app:
+  #
+  #     class Current < ActiveSupport::CurrentAttributes
+  #       attribute :couch_database
+  #     end
+  #
+  #   Then set it per-request (e.g. in ApplicationController):
+  #     Current.couch_database = SimplyCouch.database_for("http://.../company_x")
   #
   # Block-scoped:
   #   SimplyCouch.with_database(db) { ... }
   #
   # Fallback chain for Model#database:
   #   1. Model's own use_database / couchrest_database_url
-  #   2. SimplyCouch::Current.couch_database (request-scoped)
+  #   2. Current.couch_database (app-defined, request-scoped)
   #   3. SimplyCouch.database_url (global default)
 
   mattr_accessor :database_url
@@ -27,27 +34,25 @@ module SimplyCouch
 
   # Returns the effective default database (request-scoped or global).
   def self.database
-    Current.couch_database || database_for(database_url) || fallback_database
-  end
-
-  # Request-scoped database override for multi-tenant apps.
-  class Current < ActiveSupport::CurrentAttributes
-    attribute :couch_database
+    current_database || database_for(database_url) || fallback_database
   end
 
   # Temporarily switch the current database for a block.
-  # Resets to the previous database afterward.
-  #
-  #   SimplyCouch.with_database(my_db) do
-  #     Post.all  # queries my_db
-  #   end
-  #   Post.all      # back to default
   def self.with_database(database)
-    previous = Current.couch_database
-    Current.couch_database = database
+    previous = current_database
+    self.current_database = database
     yield
   ensure
-    Current.couch_database = previous
+    self.current_database = previous
+  end
+
+  # Get/set the request-scoped database (delegates to app's Current class).
+  def self.current_database
+    defined?(::Current) && ::Current.respond_to?(:couch_database) ? ::Current.couch_database : nil
+  end
+
+  def self.current_database=(db)
+    ::Current.couch_database = db if defined?(::Current) && ::Current.respond_to?(:couch_database=)
   end
 
   private
