@@ -5,9 +5,9 @@ module SimplyCouch
         def children
           return @children if @children
           if root_property = self.class.ancestry_by_property
-            @children = self.class.couch_database.view(self.class.children_view(startkey: [send(root_property), id], endkey: [send(root_property), id, {}], reduce: false))
+            @children = self.class.database.view(self.class.children_view(startkey: [send(root_property), id], endkey: [send(root_property), id, {}], reduce: false))
           else
-            @children = self.class.couch_database.view(self.class.children_view(startkey: [id], endkey: [id, {}], reduce: false))
+            @children = self.class.database.view(self.class.children_view(startkey: [id], endkey: [id, {}], reduce: false))
           end
           @children
         end
@@ -71,9 +71,9 @@ module SimplyCouch
           return @descendants if @descendants
           return @descendants = [] if id.blank?
           if root_property = self.class.ancestry_by_property
-            @descendants = self.class.couch_database.view(self.class.subtree_view(startkey: [send(root_property), id], endkey: [send(root_property), id, {}], reduce: false)).sort_by!{|d| [d.path_ids.size, d.position]}
+            @descendants = self.class.database.view(self.class.subtree_view(startkey: [send(root_property), id], endkey: [send(root_property), id, {}], reduce: false)).sort_by!{|d| [d.path_ids.size, d.position]}
           else
-            @descendants = self.class.couch_database.view(self.class.subtree_view(startkey: [id], endkey: [id, {}], reduce: false)).sort_by{|d| [d.path_ids.size, d.position]}
+            @descendants = self.class.database.view(self.class.subtree_view(startkey: [id], endkey: [id, {}], reduce: false)).sort_by{|d| [d.path_ids.size, d.position]}
           end
           @children = self.class.build_tree(@descendants)
           @descendants
@@ -149,7 +149,7 @@ module SimplyCouch
         def ancestors
           return [] unless parent_ids.any?
           return [parent] if parent_ids.size == 1 # optimization, parent is pre-loaded many times
-          (self.class.couch_database.couchrest_database.bulk_load(parent_ids)['rows'] || []).map{|h| h['doc']}.compact
+          (self.class.database.couchrest_database.bulk_load(parent_ids)['rows'] || []).map{|h| h['doc']}.compact
         end
         def parents
           ancestors

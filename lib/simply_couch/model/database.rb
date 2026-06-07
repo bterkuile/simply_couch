@@ -1,7 +1,7 @@
 module SimplyCouch
   module Model
     module Database
-      def couch_database
+      def database
         @_simply_couch_database ||= begin
           if @_couchrest_database_url
             DatabaseInstance.new(full_database_url)
