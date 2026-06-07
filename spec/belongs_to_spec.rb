@@ -11,7 +11,7 @@ describe "BelongsTo" do
       it "raise an error if another property with the same name already exists" do
         expect {
           class ::DoubleBelongsToUser
-            include SimplyStored::Couch
+            include SimplyCouch::Model
             property :user
             belongs_to :user
           end

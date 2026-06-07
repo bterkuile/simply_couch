@@ -62,16 +62,16 @@ describe "Finder" do
       end
 
       it 'raise an error when no record was found and tell you which class failed to load something' do
-        expect{ User.find 'abc' }.to raise_error SimplyStored::RecordNotFound, "User could not be found with \"abc\""
+        expect{ User.find 'abc' }.to raise_error SimplyCouch::RecordNotFound, "User could not be found with \"abc\""
       end
 
       it 'raise an error when nil was specified' do
-        expect{ User.find(nil) }.to raise_error SimplyStored::Error
+        expect{ User.find(nil) }.to raise_error SimplyCouch::Error
       end
 
       it 'raise an error when the record was not of the expected type' do
         post = Post.create
-        expect{ User.find(post.id) }.to raise_error SimplyStored::RecordNotFound
+        expect{ User.find(post.id) }.to raise_error SimplyCouch::RecordNotFound
       end
     end
 
@@ -133,7 +133,7 @@ describe "Finder" do
       end
 
       it "return raise a not found exception when called using an exclamation mark! and is no record is found" do
-        expect{ User.find_by_title!("Mr.") }.to raise_error SimplyStored::RecordNotFound
+        expect{ User.find_by_title!("Mr.") }.to raise_error SimplyCouch::RecordNotFound
       end
 
       it "find a record using multiple arguments when it ends with an exclamation mark!" do
@@ -142,7 +142,7 @@ describe "Finder" do
       end
 
       it "return raise a not found exception when called using an exclamation mark! and no record is found" do
-        expect{ User.find_by_title_and_homepage!("Mr.", "http://www.companytools.nl/") }.to raise_error SimplyStored::RecordNotFound
+        expect{ User.find_by_title_and_homepage!("Mr.", "http://www.companytools.nl/") }.to raise_error SimplyCouch::RecordNotFound
       end
     end
 
@@ -200,7 +200,7 @@ describe "Finder" do
       end
 
       it "return raise a not found exception when called using an exclamation mark! and is no records are found" do
-        expect{ User.find_all_by_title!("Mr.") }.to raise_error SimplyStored::RecordNotFound
+        expect{ User.find_all_by_title!("Mr.") }.to raise_error SimplyCouch::RecordNotFound
       end
 
       it "find records using multiple arguments when the finder ends with an exclamation mark!" do
@@ -211,7 +211,7 @@ describe "Finder" do
       end
 
       it "return raise a not found exception when the finder ends with an exclamation mark! and no records are found" do
-        expect { User.find_all_by_title_and_homepage!("Mr.", "http://www.companytools.nl/") }.to raise_error SimplyStored::RecordNotFound
+        expect { User.find_all_by_title_and_homepage!("Mr.", "http://www.companytools.nl/") }.to raise_error SimplyCouch::RecordNotFound
       end
       it "find all records through an association" do
         user1 = User.create(title: "Mr.")

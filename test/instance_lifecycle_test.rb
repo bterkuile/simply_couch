@@ -4,27 +4,27 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class InstanceLifecycleTest < Test::Unit::TestCase
   context "A simply stored couch instance" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
 
     context "design documents" do
       should "delete all" do
         db = "http://127.0.0.1:5984/#{CouchPotato::Config.database_name}"
-        assert_equal 0, SimplyStored::Couch.delete_all_design_documents(db)
+        assert_equal 0, SimplyCouch::Model.delete_all_design_documents(db)
         user = User.create
         Post.create(:user => user)
         user.posts
-        assert_equal 1, SimplyStored::Couch.delete_all_design_documents(db)
+        assert_equal 1, SimplyCouch::Model.delete_all_design_documents(db)
       end
 
       should "compact all" do
         db = "http://127.0.0.1:5984/#{CouchPotato::Config.database_name}"
-        assert_equal 0, SimplyStored::Couch.compact_all_design_documents(db)
+        assert_equal 0, SimplyCouch::Model.compact_all_design_documents(db)
         user = User.create
         Post.create(:user => user)
         user.posts
-        assert_equal 1, SimplyStored::Couch.compact_all_design_documents(db)
+        assert_equal 1, SimplyCouch::Model.compact_all_design_documents(db)
       end
     end
 

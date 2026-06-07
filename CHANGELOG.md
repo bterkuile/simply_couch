@@ -50,7 +50,7 @@ Changelog
 0.5.4
 
 - Add Rake task to compact all views in a given database: 
-  DATABASE=http://localhost:5984/my_db rake simply_stored:compact_design_documents
+  DATABASE=http://localhost:5984/my_db rake simply_couch:compact_design_documents
 
 0.5.3
 
@@ -67,7 +67,7 @@ Changelog
   n:m relations where the IDs are stored on one part as an array:
   
     class Server
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
 
       property :hostname
 
@@ -75,7 +75,7 @@ Changelog
     end
 
     class Network
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
 
       property :klass
 
@@ -117,7 +117,7 @@ Changelog
 0.3.0
 =============
 
-- SimplyStored now automatically retries conflicted save operations if it is possible to resolve the conflict.
+- SimplyCouch now automatically retries conflicted save operations if it is possible to resolve the conflict.
   Solving the conflict means that if updated were done one different attributes the local object will 
   refresh those attributes and try to save again. This will be tried two times by default. Afterwards the conflict
   exception will be re-raised.
@@ -147,15 +147,15 @@ Changelog
 
 - Add ability to delete all design documents:
     
-    SimplyStored::Couch.delete_all_design_documents('http://localhost:5984/mydbname')
+    SimplyCouch::Couch.delete_all_design_documents('http://localhost:5984/mydbname')
 
 - Add rake tasks to delete all design documents. In your Rakefile:
 
-    require 'simply_stored/rake'
+    require 'simply_couch/rake'
 
 Then you can delete all design documents in a database like this:
 
-    DATABASE=http://localhost:5984/mydb rake simply_stored:delete_design_documents    
+    DATABASE=http://localhost:5984/mydb rake simply_couch:delete_design_documents    
 
 0.1.13
 =============
@@ -164,12 +164,12 @@ Then you can delete all design documents in a database like this:
 - Auto-generate count-methods for has_many associations, e.g
 
     class Blog
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
       has_many :posts
     end
     
     class Post
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
       belongs_to :blog
     end
     

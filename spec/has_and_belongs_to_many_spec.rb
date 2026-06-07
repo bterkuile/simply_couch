@@ -14,7 +14,7 @@ describe "has_and_belongs_to_many" do
     it "raise an error if another property with the same name already exists" do
       expect {
         class ::DoubleHasAdnBelongsToManyServer
-          include SimplyStored::Couch
+          include SimplyCouch::Model
           property :other_users
           has_and_belongs_to_many :other_users
         end

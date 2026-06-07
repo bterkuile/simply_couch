@@ -3,5 +3,5 @@ rvm:
 services:
 - couchdb
 before_script:
-- "curl -X PUT localhost:5984/simply_stored_test"
+- "curl -X PUT localhost:5984/simply_couch_test"
 script: bundle exec rspec spec

@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class SoftDeletableTest < Test::Unit::TestCase
   context "when using soft deletable" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
     should "know when it is enabled" do
@@ -156,7 +156,7 @@ class SoftDeletableTest < Test::Unit::TestCase
           @hemorrhoid.delete
           @sub.reload
           assert @sub.deleted?
-          assert_raise(SimplyStored::RecordNotFound) do
+          assert_raise(SimplyCouch::RecordNotFound) do
             EasySubHemorrhoid.find(@easy_sub.id, :with_deleted => true)
           end
           @rash = Rash.find(@rash.id)
@@ -165,11 +165,11 @@ class SoftDeletableTest < Test::Unit::TestCase
       
         should "really delete them if the parent is really deleted" do
           @hemorrhoid.delete!
-          assert_raise(SimplyStored::RecordNotFound) do
+          assert_raise(SimplyCouch::RecordNotFound) do
             EasySubHemorrhoid.find(@sub.id, :with_deleted => true)
           end
           
-          assert_raise(SimplyStored::RecordNotFound) do
+          assert_raise(SimplyCouch::RecordNotFound) do
             EasySubHemorrhoid.find(@easy_sub.id, :with_deleted => true)
           end
           
@@ -210,7 +210,7 @@ class SoftDeletableTest < Test::Unit::TestCase
       context "by id" do
         should "not be found by default" do
           @hemorrhoid.destroy            
-          assert_raise(SimplyStored::RecordNotFound) do
+          assert_raise(SimplyCouch::RecordNotFound) do
             Hemorrhoid.find(@hemorrhoid.id)
           end
         end
@@ -225,7 +225,7 @@ class SoftDeletableTest < Test::Unit::TestCase
           old_id = @hemorrhoid.id
           @hemorrhoid.destroy!
           
-          assert_raise(SimplyStored::RecordNotFound) do
+          assert_raise(SimplyCouch::RecordNotFound) do
             Hemorrhoid.find(old_id)
           end
         end
@@ -422,7 +422,7 @@ class SoftDeletableTest < Test::Unit::TestCase
           
           should "not load deleted by default" do
             @sub.reload
-            assert_raise(SimplyStored::RecordNotFound) do
+            assert_raise(SimplyCouch::RecordNotFound) do
               assert_nil @sub.hemorrhoid
             end
           end

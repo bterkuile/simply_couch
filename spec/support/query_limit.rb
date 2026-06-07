@@ -28,7 +28,7 @@ RSpec::Matchers.define :exceed_query_limit do |expected|
         info = q
         begin
           record = CouchRest.get(q)
-          if record.is_a?(SimplyStored::Couch)
+          if record.is_a?(SimplyCouch::Model)
             info += " #{record.class.name}"
           end
         rescue
@@ -64,7 +64,7 @@ RSpec::Matchers.define :perform_any_queries do |expected|
         info = q
         begin
           record = CouchRest.get(q)
-          if record.is_a?(SimplyStored::Couch)
+          if record.is_a?(SimplyCouch::Model)
             info += " #{record.class.name}"
           end
         rescue

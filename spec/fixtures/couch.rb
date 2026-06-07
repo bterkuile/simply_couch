@@ -1,5 +1,5 @@
 class User
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   validates_presence_of :title
 
   property :name
@@ -16,7 +16,7 @@ class User
 end
 
 class Post
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :user
   has_many_embedded :embedded_comments
@@ -24,14 +24,14 @@ class Post
 end
 
 class EmbeddedComment
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   property :body
   is_embedded_in :post
   belongs_to :strict_post
 end
 
 class Page
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :categories, type: Array
 
@@ -39,7 +39,7 @@ class Page
 end
 
 class Directory
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :name
   property :make_invalid
@@ -56,7 +56,7 @@ class Directory
 end
 
 class NamespacedDirectory
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :name
   property :locale
@@ -65,7 +65,7 @@ class NamespacedDirectory
 end
 
 class StrictPost
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :user
 
@@ -74,7 +74,7 @@ class StrictPost
 end
 
 class Comment
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   total_pages_method 'total_pages_modified'
   current_page_method 'current_page_modified'
@@ -86,7 +86,7 @@ class Comment
 end
 
 class Category
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :name
   property :alias
@@ -96,45 +96,45 @@ class Category
 end
 
 class Document
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :author, class_name: "User"
   belongs_to :editor, class_name: "User"
 end
 
 class Tag
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :category
   property :name
 end
 
 class Instance
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   has_one :identity
 end
 
 class Identity
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   belongs_to :instance
   belongs_to :magazine
 end
 
 class Magazine
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   has_one :identity, dependent: :destroy
 end
 
 
 class UniqueUser
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :name
   validates_uniqueness_of :name
 end
 
 class UniqueUserWithAView
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   view :by_name, key: :email
   property :name
@@ -142,19 +142,19 @@ class UniqueUserWithAView
 end
 
 class CountMe
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :title
 end
 
 class DontCountMe
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :title
 end
 
 class Journal
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   has_many :memberships, dependent: :destroy
   has_many :readers, through: :memberships, dependent: :destroy
@@ -162,21 +162,21 @@ class Journal
 end
 
 class Reader
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   has_many :memberships, dependent: :destroy
   has_many :journals, through: :memberships
 end
 
 class Membership
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :reader
   belongs_to :journal
 end
 
 class Callbacker
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   property :name
   property :raise_on_save, type: :boolean, default: false
   property :with_validation_error, type: :boolean, default: false
@@ -198,7 +198,7 @@ class Callbacker
 end
 
 class Hemorrhoid
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   enable_soft_delete
 
@@ -225,7 +225,7 @@ class Hemorrhoid
 end
 
 class SubHemorrhoid
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   enable_soft_delete
 
@@ -233,19 +233,19 @@ class SubHemorrhoid
 end
 
 class EasySubHemorrhoid
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :hemorrhoid
 end
 
 class Rash
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :hemorrhoid
 end
 
 class SmallRash
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   enable_soft_delete
 
@@ -253,32 +253,32 @@ class SmallRash
 end
 
 class Pain
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   has_many :hemorrhoids
   has_many :users, through: :hemorrhoids
 end
 
 class Spot
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   has_one :hemorrhoid
 end
 
 class Master
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   has_many :servants, dependent: :ignore
 end
 
 class Servant
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :master
 end
 
 class Issue
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   belongs_to :problem
   belongs_to :big_problem
@@ -287,7 +287,7 @@ class Issue
 end
 
 class Problem
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   has_many :issues
   has_one :issue
@@ -298,7 +298,7 @@ class BigProblem < Problem
 end
 
 class Server
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :hostname
 
@@ -308,7 +308,7 @@ class Server
 end
 
 class Network
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :klass
 
@@ -321,13 +321,13 @@ class Subnet < Network
 end
 
 class Ip
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   has_and_belongs_to_many :servers, storing_keys: true
 end
 
 class Router
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   enable_soft_delete
 
   property :hostname
@@ -336,7 +336,7 @@ class Router
 end
 
 class Book
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :title
 
@@ -344,7 +344,7 @@ class Book
 end
 
 class Author
-  include SimplyStored::Couch
+  include SimplyCouch::Model
   enable_soft_delete
 
   property :name

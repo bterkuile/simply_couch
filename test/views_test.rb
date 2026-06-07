@@ -2,17 +2,17 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 
 class CustomViewUser
-  include SimplyStored::Couch
+  include SimplyCouch::Model
 
   property :tags
-  view :by_tags, :type => SimplyStored::Couch::Views::ArrayPropertyViewSpec, :key => :tags
+  view :by_tags, :type => SimplyCouch::Model::Views::ArrayPropertyViewSpec, :key => :tags
 end
 
 class ViewsTest < Test::Unit::TestCase
 
   context "Custom couch views" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
 

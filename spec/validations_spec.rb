@@ -22,7 +22,7 @@ describe 'validations' do
 
     context "with validates_format_of" do
       class ValidatedUser
-        include SimplyStored::Couch
+        include SimplyCouch::Model
         property :name
         validates_format_of :name, with: /Paul/
       end
@@ -44,7 +44,7 @@ describe 'validations' do
 
       context "with allow_blank" do
         class ValidatedBlankUser
-          include SimplyStored::Couch
+          include SimplyCouch::Model
           property :name
           validates_format_of :name, with: /Paul/, allow_blank: true
         end
@@ -119,7 +119,7 @@ describe 'validations' do
         user.should_not eq other_user
       end
 
-      it "not bail when comparing with non-SimplyStored objects" do
+      it "not bail when comparing with non-SimplyCouch objects" do
         user = UniqueUser.create(name: "Host Master")
         5.should_not eq user
         user.should_not eq 5

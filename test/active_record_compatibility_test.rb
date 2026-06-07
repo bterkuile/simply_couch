@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class PaginationTest < Test::Unit::TestCase
   context "primary_key" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
     should "respond to primary_key and return id" do
@@ -17,7 +17,7 @@ class CallbackerTest < Test::Unit::TestCase
 
   context "run" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
 

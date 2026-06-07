@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class MassAssignmentProtectionTest < Test::Unit::TestCase
   context "attribute proctection against mass assignment" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
 

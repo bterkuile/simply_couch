@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class RetryOnErrorTest < Test::Unit::TestCase
   context "when handling connection errors" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
     

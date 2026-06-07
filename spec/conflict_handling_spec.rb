@@ -56,25 +56,25 @@ describe "ConflictHandling" do
       original.save.should be true
 
       copy.name = 'Prof.'
-      expect { copy.save }.to raise_error SimplyStored::Conflict
+      expect { copy.save }.to raise_error SimplyCouch::Conflict
 
       copy.name.should eq "Prof."
       copy.reload.name.should eq "Pluto"
     end
 
     it "re-raise the conflict if retried several times" do
-      allow( User.database ).to receive(:save_document).and_raise(SimplyStored::Conflict.new)
+      allow( User.database ).to receive(:save_document).and_raise(SimplyCouch::Conflict.new)
 
       copy.name = 'Prof.'
-      expect { copy.save }.to raise_error SimplyStored::Conflict
+      expect { copy.save }.to raise_error SimplyCouch::Conflict
     end
 
     it "not try to merge and re-save if auto_conflict_resolution_on_save is disabled" do
       User.auto_conflict_resolution_on_save = false
-      allow( User.database ).to receive(:save_document).and_raise(SimplyStored::Conflict.new)
+      allow( User.database ).to receive(:save_document).and_raise(SimplyCouch::Conflict.new)
 
       copy.name = 'Prof.'
-      expect { copy.save }.to raise_error SimplyStored::Conflict
+      expect { copy.save }.to raise_error SimplyCouch::Conflict
     end
 
     context "with conflict information" do
@@ -86,7 +86,7 @@ describe "ConflictHandling" do
         copy.name = 'Prof.'
         begin
           copy.save
-        rescue SimplyStored::Conflict => e
+        rescue SimplyCouch::Conflict => e
           e.message.should eq '409 Conflict - conflict on attributes: ["name"]'
         end
       end
@@ -101,14 +101,14 @@ describe "ConflictHandling" do
         copy.name = 'Prof.'
         begin
           copy.save.should be true
-        rescue SimplyStored::Conflict => e
+        rescue SimplyCouch::Conflict => e
           e.message.should eq '409 Conflict - conflict on attributes: ["name"]'
         end
 
         other_copy.title = 'Prof.'
         begin
           other_copy.save
-        rescue SimplyStored::Conflict => e
+        rescue SimplyCouch::Conflict => e
           e.message.should eq '409 Conflict - conflict on attributes: ["title"]'
         end
       end

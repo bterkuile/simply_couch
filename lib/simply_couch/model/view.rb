@@ -1,0 +1,8 @@
+require 'simply_couch/model/view/base_view_spec'
+require 'simply_couch/model/view/model_view_spec'
+require 'simply_couch/model/view/properties_view_spec'
+require 'simply_couch/model/view/custom_view_spec'
+require 'simply_couch/model/view/raw_view_spec'
+require 'simply_couch/model/view/view_query'
+require 'simply_couch/model/view/custom_views'
+require 'simply_couch/model/view/lists'

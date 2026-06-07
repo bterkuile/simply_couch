@@ -10,7 +10,7 @@ require 'pry'
 require 'mocha/setup'
 $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../lib"))
 puts File.expand_path(File.dirname(__FILE__) + "/lib")
-require 'simply_stored'
+require 'simply_couch'
 class MiniTest::Unit::TestCase
   include ActiveSupport::Testing::Assertions
 

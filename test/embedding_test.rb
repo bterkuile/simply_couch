@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class EmbeddingTest < Test::Unit::TestCase
   context "initialized comments" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
       @post = Post.new
       @post.embedded_comments= [{'ruby_class' => 'EmbeddedComment', 'body' => 'body1'}, {'ruby_class' => 'EmbeddedComment', 'body' => 'body2'}]
@@ -78,7 +78,7 @@ class EmbeddingTest < Test::Unit::TestCase
 
   context "Creation of comment" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
       @post = Post.new
       @post.save

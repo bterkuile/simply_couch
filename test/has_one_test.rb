@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class HasOneTest < Test::Unit::TestCase
   context "with has_one" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
     end
 
@@ -15,7 +15,7 @@ class HasOneTest < Test::Unit::TestCase
     should "raise an error if another property with the same name already exists" do
       assert_raise(RuntimeError) do
         class ::DoubleHasOneUser
-          include SimplyStored::Couch
+          include SimplyCouch::Model
           property :user
           has_one :user
         end

@@ -1,22 +1,20 @@
-Convenience layer for CouchDB on top of CouchPotato.
-===================================================
-[![Build Status](https://travis-ci.org/bterkuile/simply_stored.svg?branch=master)](https://travis-ci.org/bterkuile/simply_stored)
+# SimplyCouch
 
-SimplyStored allows you to persist your objects to CouchDB using an ActiveRecord-like syntax.
+Simple CouchDB ORM with an ActiveRecord-like syntax.
 
-In contrast to [CouchPotato](http://github.com/langalex/couch_potato) (on top of it is build)
-it supports associations and other syntactic sugar that makes ActiveRecord so appealing.
+Zero driver dependencies — your app brings its own CouchDB client (couchrest, couchbase, etc.).
+ActiveModel-compliant, supports associations, validations, callbacks, views, soft delete, S3 attachments, pagination, and more.
 
-SimplyStored has also support for S3 attachments.
+SimplyCouch has also support for S3 attachments.
 
 See also [RockingChair](http://github.com/jweiss/rocking_chair) on how to speed-up your unit tests
 by using an in-memory CouchDB backend.
 
-More examples on how to work with SimplyStored can be found [here](http://github.com/jweiss/simply_stored_examples)
+More examples on how to work with SimplyCouch can be found [here](http://github.com/jweiss/simply_couch_examples)
 
 This fork
 ------------
-This fork of SimplyStored adds some extras to the standard version. A list of this is:
+This fork of SimplyCouch adds some extras to the standard version. A list of this is:
 
 * Pagination, use: Person.all(:page => params[:page], :per\_page => 40) out of the box
 * Namespace support, there is working namespace support. It is still in the child phase, but works for me
@@ -30,7 +28,7 @@ This fork of SimplyStored adds some extras to the standard version. A list of th
 Installation
 ------------
 Add the following to your bundle file
-    gem 'simply_stored', :git => 'git://github.com/bterkuile/simply_stored.git'
+    gem 'simply_couch', :git => 'git://github.com/bterkuile/simply_couch.git'
 
 #### Using with Rails
 
@@ -62,7 +60,7 @@ gem 'railties'
 gem 'actionpack'
 gem 'actionmailer'
 gem 'activemodel'
-gem 'simply_stored', :require => 'simply_stored/couch'
+gem 'simply_couch', :require => 'simply_couch/couch'
 ```
 
 Please also see the installation info of [CouchPotato](https://github.com/langalex/couch_potato)
@@ -70,23 +68,23 @@ Please also see the installation info of [CouchPotato](https://github.com/langal
 Usage
 -------------
 
-Require SimplyStored:
+Require SimplyCouch:
 
 ```ruby
-require 'simply_stored'
+require 'simply_couch'
 CouchPotato::Config.database_name = "http://example.com:5984/name_of_the_db"
 ```
 
-From now on you can define classes that use SimplyStored.
+From now on you can define classes that use SimplyCouch.
 
 Intro
 -------------
 
-SimplyStored auto-generates views for you and handles all the serialization and de-serialization stuff.
+SimplyCouch auto-generates views for you and handles all the serialization and de-serialization stuff.
 
 ```ruby
 class User
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
 
   property :login
   property :age
@@ -104,7 +102,7 @@ User.all
 # => [user]
 
 class Post
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
 
   property :title
   property :body
@@ -116,13 +114,13 @@ class User
   has_many :posts
 end
 
-post = Post.create(:title => 'My first post', :body => 'SimplyStored is so nice!', :user => user)
+post = Post.create(:title => 'My first post', :body => 'SimplyCouch is so nice!', :user => user)
 
 user.posts
 # => [post]
 
 Post.find_all_by_title_and_user_id('My first post', user.id).first.body
-# => 'SimplyStored is so nice!'
+# => 'SimplyCouch is so nice!'
 
 post.destroy
 
@@ -136,7 +134,7 @@ Associations
 The supported associations are: belongs_to, has_one, has_many, has_many :through, and has_and_belongs_to_many:
 
     class Post
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
 
       property :title
       property :body
@@ -147,7 +145,7 @@ The supported associations are: belongs_to, has_one, has_many, has_many :through
     end
 
     class Comment
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
 
       property :body
 
@@ -184,7 +182,7 @@ The supported associations are: belongs_to, has_one, has_many, has_many :through
   n:m relations where the IDs are stored on one part as an array:
 
     class Server
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
 
       property :hostname
 
@@ -192,7 +190,7 @@ The supported associations are: belongs_to, has_one, has_many, has_many :through
     end
 
     class Network
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
 
       property :klass
 
@@ -213,7 +211,7 @@ Custom Associations
 -------------
 
     class Document
-      include SimplyStored::Couch
+      include SimplyCouch::Couch
 
       belongs_to :creator, :class_name => "User"
       belongs_to :updater, :class_name => "User"
@@ -235,7 +233,7 @@ The containment validator checks wether an array property is contained within a 
 
 ```ruby
 class Page
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
 
   property :categories
 
@@ -250,12 +248,12 @@ Page.new(categories: %w[one four]).valid? #=> false
 S3 Attachments
 -------------
 
-SimplyStored supports storing large attachments in Amazon S3.
+SimplyCouch supports storing large attachments in Amazon S3.
 It uses RightAWS for the interaction with the EC2 API:
 
 ```ruby
 class Log
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
   has_s3_attachment :data, :bucket => 'the-bucket-name',
                            :access_key => 'my-AWS-key-id',
                            :secret_access_key => 'psst!-secret',
@@ -279,12 +277,12 @@ This will create an item on S3 in the specified bucket. The item will use the ID
 Soft delete
 -------------
 
-SimplyStored also has support for "soft deleting" - much like acts_as_paranoid. Items will then not be deleted but only marked as deleted. This way you can recover them later.
+SimplyCouch also has support for "soft deleting" - much like acts_as_paranoid. Items will then not be deleted but only marked as deleted. This way you can recover them later.
 
 **NOTE: Not tested for a long time (@bterkuile 2014-11-10)**
 ```ruby
 class Document
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
 
   property :title
   enable_soft_delete # will use :deleted_at attribute by default
@@ -305,7 +303,7 @@ Document.find_all_by_title('secret project info', with_deleted: true)
 
 CouchDB - Auto resolution of conflicts on save
 
-SimplyStored now by default retries conflicted save operations if it is possible to resolve the conflict.
+SimplyCouch now by default retries conflicted save operations if it is possible to resolve the conflict.
 Solving the conflict means that if updated were done one different attributes the local object will
 refresh those attributes and try to save again. This will be tried two times by default. Afterwards the conflict
 exception will be re-raised.
@@ -316,7 +314,7 @@ This feature can be controlled on the class level like this:
 If auto_conflict_resolution_on_save is enabled, something like this will work:
 ```ruby
 class Document
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
 
   property :title
   property :content
@@ -346,7 +344,7 @@ far from ideal. Instead this approach uses map reduce to help with fancy queries
 Example ancestry model, a nested directory structure:
 ```ruby
 class Directory
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
 
   property :name
 
@@ -401,7 +399,7 @@ dir1.add_child dir1_1
 When you want a different tree for a different language in your website, you might want to use ancesty as well. Different languages have different trees however. This is supported:
 ```ruby
 class Page
-  include SimplyStored::Couch
+  include SimplyCouch::Couch
 
   has_ancestry by_property: :locale
 end
@@ -428,9 +426,9 @@ having `app/views/application/_menu_item.html.slim`
 License
 -------------
 
-SimplyStored is licensed under the OpenBSD / two-clause BSD license, modeled after the ISC license. See LICENSE.txt
+SimplyCouch is licensed under the OpenBSD / two-clause BSD license, modeled after the ISC license. See LICENSE.txt
 
 About
 -------------
 
-SimplyStored was written by [Mathias Meyer](http://twitter.com/roidrage) and [Jonathan Weiss](http://twitter.com/jweiss) for [Peritor](http://www.peritor.com).
+SimplyCouch was written by [Mathias Meyer](http://twitter.com/roidrage) and [Jonathan Weiss](http://twitter.com/jweiss) for [Peritor](http://www.peritor.com).

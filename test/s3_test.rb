@@ -4,7 +4,7 @@ require File.expand_path(File.dirname(__FILE__) + '/fixtures/couch')
 class S3Test < Test::Unit::TestCase
   context "with s3 interaction" do
     setup do
-      CouchPotato::Config.database_name = 'simply_stored_test'
+      CouchPotato::Config.database_name = 'simply_couch_test'
       recreate_db
       CouchLogItem.instance_variable_set(:@_s3_connection, nil)
       CouchLogItem._s3_options[:log_data][:ca_file] = nil
@@ -99,7 +99,7 @@ class S3Test < Test::Unit::TestCase
 
       should "set the permissions to private by default" do
         class Item
-          include SimplyStored::Couch
+          include SimplyCouch::Model
           has_s3_attachment :log_data, :bucket => 'mybucket'
         end
         @bucket.expects(:put).with(anything, anything, {}, 'private')

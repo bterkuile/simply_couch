@@ -11,7 +11,7 @@ describe "HasMany" do
       it "raise an error if another property with the same name already exists" do
         expect {
           class ::DoubleHasManyUser
-            include SimplyStored::Couch
+            include SimplyCouch::Model
             property :other_users
             has_many :other_users
           end
@@ -393,7 +393,7 @@ describe "HasMany" do
 
         expect {
           class FooHasManyThroughBar
-            include SimplyStored::Couch
+            include SimplyCouch::Model
             has_many :foos, :through => :bars
           end
         }.to raise_error ArgumentError
