@@ -276,6 +276,7 @@ module SimplyStored
             instance.instance_variable_set(:@_document, doc)
             instance._id = doc[:_id] || doc['_id']
             instance._rev = doc[:_rev] || doc['_rev']
+            instance._attachments = doc[:_attachments] || doc['_attachments']
             instance
           end
         end
