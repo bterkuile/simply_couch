@@ -19,6 +19,7 @@ unless defined?(SimplyCouch)
     class ModelNotInstantiatedError < RuntimeError; end
   end
 
+  require 'simply_couch/database_config'
   require 'simply_couch/model'
   require 'core_ext/time'
   require 'core_ext/date'

@@ -2,7 +2,13 @@ module SimplyCouch
   module Model
     module Database
       def database
-        @_simply_couch_database ||= DatabaseInstance.new(full_database_url)
+        @_simply_couch_database ||= begin
+          if @_couchrest_database_url
+            DatabaseInstance.new(full_database_url)
+          else
+            SimplyCouch.database
+          end
+        end
       end
 
       # Override this to provide a custom database URL.
