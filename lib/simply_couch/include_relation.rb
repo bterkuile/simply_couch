@@ -35,8 +35,8 @@ class Array
     relations = {}
     database = nil
     database = relations_arg.last.delete(:database) if relations_arg.last.is_a?(Hash) and relations_arg.last.has_key?(:database)
-    database ||= self.first&.class&.couch_database
-    raise ArgumentError, "Cannot include relations without a database — pass :database option or ensure models respond to .couch_database" unless database
+    database ||= self.first&.class&.database
+    raise ArgumentError, "Cannot include relations without a database — pass :database option or ensure models respond to .database" unless database
 
     # Make sure relations is a Hash, process up to two levels for recursion
     # keys with value nil will not have a followup
@@ -72,7 +72,7 @@ class Array
         #TODO riase when soft_delete is enabled
         view_name = "by_#{other_property.name}_id"
         raise "Cannot include has_many relation #{other_class.name.underscore.pluralize} on #{klass.name} when view :#{view_name}, key: :#{other_property.name}_id is not defined on #{other_class.name}" unless other_class.views[view_name].present?
-        relation_objects = other_class.couch_database.view(other_class.send(view_name, keys: collect(&:id))) #not working yet
+        relation_objects = other_class.database.view(other_class.send(view_name, keys: collect(&:id))) #not working yet
         if followup # deeper nested including
           case followup
           when Hash
