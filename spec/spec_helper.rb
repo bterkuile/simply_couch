@@ -23,6 +23,7 @@ RSpec.configure do |config|
     end
     begin; server.create_db(TEST_DB); rescue CouchRest::PreconditionFailed, CouchRest::PreconditionFailed, CouchRest::NotFound; end
     SimplyCouch::Model::Database.class_eval do
+    SimplyCouch.database_url = "#{COUCHDB_URL}/#{TEST_DB}"
       define_method(:couchrest_database_url) { "#{COUCHDB_URL}/#{TEST_DB}" }
     end
   end
