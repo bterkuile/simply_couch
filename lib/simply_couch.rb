@@ -17,14 +17,6 @@ unless defined?(SimplyCouch)
     class RecordNotFound < RuntimeError; end
     class NotImplementedError < RuntimeError; end
     class ModelNotInstantiatedError < RuntimeError; end
-
-    mattr_accessor :default_database_url
-
-    def self.default_database(url = nil)
-      self.default_database_url = url if url
-      return nil unless default_database_url
-      Model::DatabaseInstance.new(default_database_url)
-    end
   end
 
   require 'simply_couch/model'
