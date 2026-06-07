@@ -33,6 +33,10 @@ require 'simply_couch/include_relation'
 
 module SimplyCouch
   module Model
+    def self.default_database
+      SimplyCouch.default_database
+    end
+
     def self.included(clazz)
       clazz.send(:include, Persistence)
       clazz.send(:include, InstanceMethods)
