@@ -18,7 +18,9 @@ module SimplyCouch
           end
 
           def execute_view(view_name, view_parameters)
-            view_spec_class(views(view_name)[:type]).new(self, view_name, views(view_name), view_parameters)
+            options = views(view_name).dup
+            options[:split_design_doc] = split_design_documents? if respond_to?(:split_design_documents?)
+            view_spec_class(options[:type]).new(self, view_name, options, view_parameters)
           end
 
           # Declare a CouchDB view, for examples on how to use see the *ViewSpec classes in SimplyCouch::Model::View

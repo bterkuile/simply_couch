@@ -10,7 +10,6 @@ module SimplyCouch
 
         DEFAULT_LANGUAGE = :javascript
         DEFAULT_DIGEST_VIEW_NAMES = false
-        DEFAULT_SPLIT_DESIGN_DOCUMENTS = false
 
         def initialize(klass, view_name, options, view_parameters)
           normalized_view_parameters = normalize_view_parameters view_parameters
@@ -104,7 +103,7 @@ module SimplyCouch
           klass_name.tr!('-', '_')
           doc_name = klass_name.downcase
 
-          if DEFAULT_SPLIT_DESIGN_DOCUMENTS
+          if options && options[:split_design_doc]
             doc_name += "_view_#{view_name}"  if view_name.present?
             doc_name += "_list_#{list_name}" if list_name.present?
           end

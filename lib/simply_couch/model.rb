@@ -89,6 +89,14 @@ module SimplyCouch
         !soft_delete_attribute.nil?
       end
 
+      def split_design_documents_per_view(enabled = true)
+        @_split_design_documents = enabled
+      end
+
+      def split_design_documents?
+        @_split_design_documents || false
+      end
+
       def auto_conflict_resolution_on_save
         @auto_conflict_resolution_on_save.nil? ? true : @auto_conflict_resolution_on_save
       end
