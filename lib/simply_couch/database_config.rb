@@ -32,6 +32,21 @@ module SimplyCouch
     attribute :database
   end
 
+  # Temporarily switch the current database for a block.
+  # Resets to the previous database afterward.
+  #
+  #   SimplyCouch.with_database(my_db) do
+  #     Post.all  # queries my_db
+  #   end
+  #   Post.all      # back to default
+  def self.with_database(database)
+    previous = Current.database
+    Current.database = database
+    yield
+  ensure
+    Current.database = previous
+  end
+
   private
 
   def self.databases
