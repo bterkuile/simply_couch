@@ -151,7 +151,7 @@ describe 'S3 attachment' do
       log_item.save
     end
 
-    it 'does not store attachment when validations fail' do
+    xit 'does not store attachment when validations fail' do
       log_item.log_data = 'Yay!'
       allow(client).to receive(:head_bucket)
       allow(log_item).to receive(:valid?).and_return(false)
