@@ -33,18 +33,6 @@ module SimplyCouch
           end
           instance_variable_set("@#{name}", current)
           return current
-          local_options = args.first && args.first.is_a?(Hash)
-          forced_reload, with_deleted, limit, descending = extract_association_options(local_options)
-
-          cached_results = send("_get_cached_#{name}") || {}
-          cache_key = _cache_key_for(local_options)
-          debugger
-          if forced_reload || cached_results[cache_key].nil?
-            cached_results[cache_key] = Array.wrap(self.send(property_getter_method)).map { |h| o = options[:class_name].constantize.new; o._document = h; o }.map { |o| o.parent_object = self; o }
-            instance_variable_set("@#{name}", cached_results)
-            self.class.set_parent_has_many_embedded_association_object(self, cached_results[cache_key])
-          end
-          cached_results[cache_key]
         end
       end
 
