@@ -65,12 +65,26 @@ module SimplyCouch
           end
         end
 
-        def self.define_local_attached(base, name, styles: {}, default_url: nil, default_style: :original)
+        def self.define_local_attached(base, name, styles: {}, default_url: nil, default_style: :original, content_type: nil)
           # Auto-declare CouchDB properties for attachment metadata
           base.property :"#{name}_file_name"
           base.property :"#{name}_content_type"
           base.property :"#{name}_file_size", type: Integer
           base.property :"#{name}_updated_at", type: Time
+
+          # Auto-validate content type (replaces Paperclip validates_attachment_content_type)
+          if content_type
+            base.validate :"#{name}_content_type_must_be_allowed"
+            base.define_method(:"#{name}_content_type_must_be_allowed") do
+              fname = send(:"#{name}_file_name")
+              return if fname.blank?
+              ctype = send(:"#{name}_content_type")
+              allowed = content_type.is_a?(Array) ? content_type : [content_type]
+              unless allowed.any? { |t| ctype&.start_with?(t) || ctype == t }
+                errors.add(name, "must be one of: #{allowed.join(', ')}")
+              end
+            end
+          end
 
           # Register configuration
           base.attachment_registry[name] = {
