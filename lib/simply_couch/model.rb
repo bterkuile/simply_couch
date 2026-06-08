@@ -70,6 +70,14 @@ module SimplyCouch
         SimplyCouch::Model::Attachment::Couch.define_couch_attached(self, name, options)
       end
 
+      # Declare a local filesystem attachment (Paperclip replacement).
+      # Lazy-loads + includes SimplyCouch::Model::Attachment::Local.
+      def has_local_attached(name, styles: {}, default_url: nil, default_style: :original)
+        require 'simply_couch/model/attachment/local'
+        include SimplyCouch::Model::Attachment::Local unless included_modules.include?(SimplyCouch::Model::Attachment::Local)
+        SimplyCouch::Model::Attachment::Local.define_local_attached(self, name, styles: styles, default_url: default_url, default_style: default_style)
+      end
+
       def create(attributes = {}, &blk)
         instance = new(attributes, &blk)
         instance.save
