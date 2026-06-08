@@ -2,7 +2,7 @@ require 'spec_helper'
 
 class CouchLogItem
   include SimplyCouch::Model
-  has_s3_attachment :log_data, bucket: 'bucket-for-monsieur', access_key: 'abcdef', secret_access_key: 'secret!'
+  has_s3_attached :log_data, bucket: 'bucket-for-monsieur', access_key: 'abcdef', secret_access_key: 'secret!'
 end
 
 describe 'S3 attachment' do

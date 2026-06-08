@@ -15,6 +15,7 @@ RSpec.configure do |config|
 
   config.before(:each) do
     $performed_queries = []
+    SimplyCouch::Model::View::ViewQuery.clear_cache
     server = CouchRest.new(COUCHDB_URL)
     begin
       server.database(TEST_DB).delete!

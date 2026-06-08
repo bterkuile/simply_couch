@@ -117,7 +117,7 @@ module SimplyCouch
     end
 
     module ClassMethods
-      def has_s3_attachment(name, options = {})
+      def has_s3_attached(name, options = {})
         require 'aws-sdk-s3'
 
         name = name.to_sym
@@ -152,6 +152,9 @@ module SimplyCouch
         attr_reader :_s3_attachments
         include InstanceMethods
       end
+
+      # Backward compatibility
+      alias_method :has_s3_attachment, :has_s3_attached
 
       def define_attachment_accessors(name)
         define_method(name) do
