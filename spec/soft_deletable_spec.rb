@@ -352,11 +352,11 @@ RSpec.describe 'SoftDeletable' do
 
         context 'has_many' do
           it 'does not load deleted by default' do
-            expect(@user.hemorrhoids).to eq []
+            expect(@user.hemorrhoids(:force_reload => true)).to eq []
           end
 
           it 'loads deleted if asked to' do
-            expect(@user.hemorrhoids(:with_deleted => true).map(&:id)).to eq [@hemorrhoid.id]
+            expect(@user.hemorrhoids(:force_reload => true, :with_deleted => true).map(&:id)).to eq [@hemorrhoid.id]
           end
         end
 
@@ -394,11 +394,11 @@ RSpec.describe 'SoftDeletable' do
           end
 
           it 'does not load deleted by default' do
-            expect(@spot.hemorrhoid).to be_nil
+            expect(@spot.hemorrhoid(:force_reload => true)).to be_nil
           end
 
           it 'loads deleted if asked to' do
-            expect(@spot.hemorrhoid(:with_deleted => true).id).to eq @hemorrhoid.id
+            expect(@spot.hemorrhoid(:force_reload => true, :with_deleted => true).id).to eq @hemorrhoid.id
           end
         end
 
@@ -416,12 +416,12 @@ RSpec.describe 'SoftDeletable' do
 
           it 'does not load deleted by default' do
             @sub.reload
-            expect { @sub.hemorrhoid }.to raise_error(SimplyCouch::RecordNotFound)
+            expect(@sub.hemorrhoid(:force_reload => true)).to be_nil
           end
 
           it 'loads deleted if asked to' do
             @sub.reload
-            expect(@sub.hemorrhoid(:with_deleted => true).id).to eq @hemorrhoid.id
+            expect(@sub.hemorrhoid(:force_reload => true, :with_deleted => true).id).to eq @hemorrhoid.id
           end
         end
       end
