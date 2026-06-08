@@ -75,10 +75,7 @@ describe 'Embedding' do
   end
 
   context 'Creation of comment' do
-    before do
-      @post = Post.new
-      @post.save
-    end
+    before { @post = Post.create }
 
     it 'not save when no parent is present' do
       comment = EmbeddedComment.new(body: 'no parent')
