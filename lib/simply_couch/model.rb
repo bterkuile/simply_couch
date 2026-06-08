@@ -68,8 +68,6 @@ module SimplyCouch
         include SimplyCouch::Model::Attachment::S3::InstanceMethods unless included_modules.include?(SimplyCouch::Model::Attachment::S3::InstanceMethods)
         SimplyCouch::Model::Attachment::S3.define_s3_attached(self, name, options)
       end
-      alias_method :has_s3_attachment, :has_s3_attached
-
       # Declare a CouchDB inline attachment.
       # Lazy-loads + includes SimplyCouch::Model::Attachment::Couch.
       def has_couch_attached(name, options = {})

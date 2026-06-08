@@ -8,7 +8,6 @@ end
 unless defined?(SimplyCouch)
   $:<<(File.expand_path(File.dirname(__FILE__) + "/lib"))
   require 'simply_couch/instance_methods'
-  require 'simply_couch/storage'
   require 'simply_couch/class_methods_base'
 
   module SimplyCouch
