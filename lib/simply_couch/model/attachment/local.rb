@@ -167,9 +167,10 @@ module SimplyCouch
             end
           end
 
-          # ---- Getter: model.file → Proxy ----
+          # ---- Getter: model.file → Proxy (memoized) ----
           base.define_method(name) do
-            Proxy.new(self, name)
+            cache_key = :"@_attachment_proxy_#{name}"
+            instance_variable_get(cache_key) || instance_variable_set(cache_key, Proxy.new(self, name))
           end
 
           # ---- Presence check: model.file? ----
