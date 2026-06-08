@@ -62,6 +62,14 @@ module SimplyCouch
       include SimplyCouch::Storage::ClassMethods
       include SimplyCouch::Model::Ancestry
 
+      # Declare a CouchDB inline attachment.
+      # Lazy-loads + includes SimplyCouch::Model::Attachment::Couch.
+      def has_couch_attached(name, options = {})
+        require 'simply_couch/model/attachment/couch'
+        include SimplyCouch::Model::Attachment::Couch unless included_modules.include?(SimplyCouch::Model::Attachment::Couch)
+        SimplyCouch::Model::Attachment::Couch.define_couch_attached(self, name, options)
+      end
+
       def create(attributes = {}, &blk)
         instance = new(attributes, &blk)
         instance.save
