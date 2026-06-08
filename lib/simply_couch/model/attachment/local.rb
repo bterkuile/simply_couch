@@ -46,7 +46,7 @@ module SimplyCouch
             @record.send(:"#{@name}_url", style)
           end
 
-          def path(style = :original)
+          def path(style = nil)
             @record.send(:"#{@name}_path", style)
           end
 
@@ -205,7 +205,8 @@ module SimplyCouch
           base.define_method(:"#{name}_path") do |style_name = nil|
             url = send(:"#{name}_url", style_name)
             return nil if url.nil?
-            Rails.root.join('public', url.sub(%r{^/}, ''))
+            root = defined?(Rails) ? Rails.root : Pathname.new(Dir.pwd)
+            root.join('public', url.sub(%r{^/}, ''))
           end
         end
 
