@@ -32,18 +32,20 @@ module SimplyCouch
             to_hash, name, file, content_type: content_type
           )
           self._rev = result['rev'] if result['ok']
+          self._attachments = (_attachments || {}).merge(name => {})
           result
         end
 
         def fetch_couch_attachment(name)
           _couchrest_database.fetch_attachment(to_hash, name)
-        rescue RestClient::ResourceNotFound
+        rescue CouchRest::NotFound
           nil
         end
 
         def delete_couch_attachment(name)
           result = _couchrest_database.delete_attachment(to_hash, name)
           self._rev = result['rev'] if result['ok']
+          self._attachments = (_attachments || {}).except(name) if result['ok']
           result
         end
 
@@ -113,7 +115,7 @@ module SimplyCouch
 
           # URL getter
           base.define_method(:"#{name}_url") do
-            db_url = database.couchrest_database_url
+            db_url = _couchrest_database.root
             doc_id = _id
             filename = public_send(:"#{name}_filename")
             "#{db_url}/#{doc_id}/#{filename}"
