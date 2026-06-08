@@ -29,7 +29,7 @@ module SimplyCouch
           end
 
           def present?
-            @record.send(:"#{@name}_file_name").present?
+            @record.public_send(:"#{@name}_file_name").present?
           end
 
           def blank?
@@ -43,15 +43,15 @@ module SimplyCouch
           alias exist? file?
 
           def url(style = nil)
-            @record.send(:"#{@name}_url", style)
+            @record.public_send(:"#{@name}_url", style)
           end
 
           def path(style = nil)
-            @record.send(:"#{@name}_path", style)
+            @record.public_send(:"#{@name}_path", style)
           end
 
           def original_filename
-            @record.send(:"#{@name}_file_name")
+            @record.public_send(:"#{@name}_file_name")
           end
 
           def content_type

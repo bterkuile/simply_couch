@@ -117,7 +117,7 @@ module SimplyCouch
               @_s3_attachments.each do |name, attachment|
                 if attachment[:dirty]
                   value = attachment[:value].is_a?(String) ? attachment[:value] : attachment[:value].to_json
-                  send("#{name}_size=", (value.size rescue nil))
+                  public_send("#{name}_size=", (value.size rescue nil))
                 end
               end
             end
