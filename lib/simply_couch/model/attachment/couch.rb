@@ -82,7 +82,7 @@ module SimplyCouch
             cache_key = :"@_couch_attachment_#{name}"
             return instance_variable_get(cache_key) if instance_variable_defined?(cache_key)
 
-            filename = send(:"#{name}_filename")
+            filename = public_send(:"#{name}_filename")
             data = fetch_couch_attachment(filename)
             instance_variable_set(cache_key, data)
             data
@@ -95,16 +95,16 @@ module SimplyCouch
 
             # Detect content type
             content_type = options[:content_type] || _detect_content_type(value)
-            send(:"#{name}_content_type=", content_type) if value
+            public_send(:"#{name}_content_type=", content_type) if value
 
             # Track size
             size = value.respond_to?(:bytesize) ? value.bytesize : value.to_s.bytesize
-            send(:"#{name}_size=", size) if value
+            public_send(:"#{name}_size=", size) if value
 
             # Queue for save
             @_pending_couch_attachments ||= {}
             @_pending_couch_attachments[name] = {
-              filename: send(:"#{name}_filename"),
+              filename: public_send(:"#{name}_filename"),
               file: value,
               content_type: content_type
             }
@@ -115,7 +115,7 @@ module SimplyCouch
           base.define_method(:"#{name}_url") do
             db_url = database.couchrest_database_url
             doc_id = _id
-            filename = send(:"#{name}_filename")
+            filename = public_send(:"#{name}_filename")
             "#{db_url}/#{doc_id}/#{filename}"
           end
         end
