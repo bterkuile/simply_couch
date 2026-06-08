@@ -8,15 +8,17 @@ module SimplyCouch
         parent = options[:class_name] || name.to_s.camelize
         self.name.property_name.pluralize
 
+        soft_delete_check = if soft_delete_attribute
+                              %{if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){ return; }}
+                            else
+                              ''
+                            end
+
         map_definition_without_deleted = <<-eos
           function(doc) {
             if (doc['ruby_class'] == '#{parent}') {
-              if(typeof(doc['']))
-              if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){
-                // "soft" deleted
-              }else{
-                emit([doc.#{name.to_s}_id, doc.created_at], 1);
-              }
+              #{soft_delete_check}
+              emit([doc.#{name.to_s}_id, doc.created_at], 1);
             }
           }
         eos
