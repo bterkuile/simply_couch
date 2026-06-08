@@ -23,7 +23,7 @@ module SimplyCouch
         base.send :include, View::Lists
 
         base.class_eval do
-          attr_accessor :_id, :_rev, :_deleted, :_attachments, :database
+          attr_accessor :_id, :_rev, :_deleted, :_attachments, :database, :_document
           alias_method :id, :_id
           alias_method :id=, :_id=
         end
@@ -136,7 +136,7 @@ module SimplyCouch
       module PropertyMethods
         private
         def load_attribute_from_document(name)
-          if _document.has_key?(name)
+          if _document&.has_key?(name)
             property = self.class.properties.find_property(name)
             @skip_dirty_tracking = true
             value = property.build(self, _document)
@@ -261,6 +261,9 @@ module SimplyCouch
         end
         alias :as_json :to_hash
         def _document; @_document ||= {}; end
+        def _document=(val)
+          @_document = val.is_a?(Hash) ? ActiveSupport::HashWithIndifferentAccess.new(val) : val
+        end
 
         def self.included(base)
           base.extend ClassMethods

@@ -57,7 +57,7 @@ describe "Embedding" do
       embedded_comments = EmbeddedComment.all
       embedded_comment = embedded_comments.first
       embedded_comment.body = 'newbody'
-      embedded_comment.parent_object.is_dirty
+      embedded_comment.parent_object.send(:attribute_will_change!, :embedded_comments)
       embedded_comment.parent_object.save
       embedded_comments_reloaded = EmbeddedComment.all
       expect(embedded_comments_reloaded.map(&:body)).to include('newbody')

@@ -65,6 +65,8 @@ module SimplyCouch
             instance_variable_get("@#{name}") << newval
             iid += 1
           end
+          current = instance_variable_get("@#{name}")
+          current.define_singleton_method(:parent_object_set?) { true }
           save
         end
       end
@@ -93,7 +95,6 @@ module SimplyCouch
           if value.is_a?(klass)
             found = instance_variable_get("@#{name}").delete(value)
             if found
-              self.is_dirty
               self.send("reset_#{name}_index_values")
             end
           else
@@ -157,6 +158,21 @@ module SimplyCouch
       
       class Property < SimplyCouch::Model::AssociationProperty
         
+        def build(object, json)
+          values = Array.wrap(json[name]).map do |v|
+            if v.is_a?(Hash)
+              obj = options[:class_name].constantize.new
+              obj._document = v
+              obj
+            else
+              v
+            end
+          end
+          values.define_singleton_method(:parent_object_set?) { true }
+          values.each_with_index { |v, i| v.index = i }
+          object.instance_variable_set("@#{name}", values)
+        end
+
         def initialize(owner_clazz, name, options = {})
           options = {
             :dependent => :nullify,

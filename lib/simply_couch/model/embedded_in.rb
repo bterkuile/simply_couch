@@ -136,11 +136,9 @@ module SimplyCouch
               end
               if callbacks
                 _run_save_callbacks do
-                  parent_object.is_dirty if self.dirty?
                   parent_object.save
                 end
               else
-                parent_object.is_dirty if self.dirty?
                 parent_object.save
               end
             end
@@ -169,7 +167,7 @@ module SimplyCouch
               end
 
               # Mark changed if appropriate
-              send("#{name}_will_change!") if value != parent_object
+              attribute_will_change!("#{name}_id") if value != parent_object
 
               instance_variable_set('@parent_object', value)
               if value.nil?
