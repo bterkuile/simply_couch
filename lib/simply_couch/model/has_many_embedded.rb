@@ -39,9 +39,8 @@ module SimplyCouch
           cached_results = send("_get_cached_#{name}") || {}
           cache_key = _cache_key_for(local_options)
           debugger
-          if forced_reload || cached_results[cache_key].nil? 
-            #cached_results[cache_key] = get_embedded(options[:class_name], self.class, :with_deleted => with_deleted, :limit => limit, :descending => descending, :foreign_key => options[:foreign_key])
-            cached_results[cache_key] = Array.wrap(self.send(property_getter_method)).map{|h| o = options[:class_name].constantize.new; o._document = h; o}.map{|o| o.parent_object = self; o}
+          if forced_reload || cached_results[cache_key].nil?
+            cached_results[cache_key] = Array.wrap(self.send(property_getter_method)).map { |h| o = options[:class_name].constantize.new; o._document = h; o }.map { |o| o.parent_object = self; o }
             instance_variable_set("@#{name}", cached_results)
             self.class.set_parent_has_many_embedded_association_object(self, cached_results[cache_key])
           end
@@ -107,31 +106,27 @@ module SimplyCouch
         end
       end
 
-
       def define_reset_index_values(name, options)
         define_method "reset_#{name}_index_values" do
           i = 0
           for embedded_document in (instance_variable_get("@#{name}") || [])
             embedded_document.index = i
-            i += 1 
+            i += 1
           end
         end
       end
 
-     # Not converted yet 
       def define_has_many_embedded_setter_remove_all(name, options)
         define_method "remove_all_#{name}" do
-          all = send("#{name}", :force_reload => true)
-          
-          all.collect{|i| i}.each do |item|
+          all = send("#{name}", force_reload: true)
+          all.collect { |i| i }.each do |item|
             send("remove_#{name.to_s.singularize}", item)
           end
         end
       end
-      
-     # Not converted yet 
+
       def define_has_many_embedded_count(name, options, through = nil)
-        method_name = name.to_s.singularize.underscore.gsub('/', '__') + "_count"
+        method_name = name.to_s.singularize.underscore.gsub('/', '__') + '_count'
         define_method(method_name) do |*args|
           local_options = args.first && args.first.is_a?(Hash) && args.first
           if local_options
@@ -144,13 +139,12 @@ module SimplyCouch
           end
 
           if forced_reload || instance_variable_get("@#{method_name}").nil?
-            instance_variable_set("@#{method_name}", count_associated(through || options[:class_name], self.class, :with_deleted => with_deleted, :foreign_key => options[:foreign_key]))
+            instance_variable_set("@#{method_name}", count_associated(through || options[:class_name], self.class, with_deleted: with_deleted, foreign_key: options[:foreign_key]))
           end
           instance_variable_get("@#{method_name}")
         end
       end
-      
-     # Not converted yet 
+
       def set_parent_has_many_embedded_association_object(parent, child_collection)
         child_collection.each do |child|
           if child.respond_to?("#{parent.class.name.to_s.singularize.downcase}=")
@@ -158,9 +152,9 @@ module SimplyCouch
           end
         end
       end
-      
+
       class Property < SimplyCouch::Model::AssociationProperty
-        
+
         def build(object, json)
           values = Array.wrap(json[name]).map do |v|
             obj = if v.is_a?(Hash)
@@ -178,17 +172,17 @@ module SimplyCouch
 
         def initialize(owner_clazz, name, options = {})
           options = {
-            :dependent => :nullify,
-            :through => nil,
-            :class_name => name.to_s.singularize.camelize,
-            :foreign_key => nil
+            dependent: :nullify,
+            through: nil,
+            class_name: name.to_s.singularize.camelize,
+            foreign_key: nil
           }.update(options)
           @name, @options = name, options
-          
+
           options.assert_valid_keys(:dependent, :through, :class_name, :foreign_key)
-          
+
           owner_clazz.class_eval do
-            property name, :type => Array
+            property name, type: Array
             _define_cache_accessors(name, options)
             define_has_many_embedded_getter(name, options)
             define_has_many_embedded_setter(name, options)
@@ -199,7 +193,7 @@ module SimplyCouch
             define_has_many_embedded_count(name, options)
           end
         end
-        
+
       end
     end
   end
