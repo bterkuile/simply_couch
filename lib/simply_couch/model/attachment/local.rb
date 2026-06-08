@@ -46,6 +46,10 @@ module SimplyCouch
             @record.send(:"#{@name}_url", style)
           end
 
+          def path(style = :original)
+            @record.send(:"#{@name}_path", style)
+          end
+
           def original_filename
             @record.send(:"#{@name}_file_name")
           end
@@ -66,11 +70,6 @@ module SimplyCouch
             end
           end
 
-          def path(style = :original)
-            u = url(style)
-            return nil if u.nil?
-            Rails.root.join('public', u.sub(%r{^/}, ''))
-          end
 
           def respond_to_missing?(method, include_private = false)
             @record.respond_to?(method, include_private) || super
