@@ -260,11 +260,91 @@ Attachments are stored inline in the CouchDB document — atomic, no extra stora
 
 See `docs/attachments.md` for a detailed comparison of approaches.
 
-### Legacy: S3 Attachments
+### S3 Attachments
 
-The `has_s3_attachment` method (using RightAws) exists but is **unmaintained and untested**.
-It was part of the original simply_stored and has not been verified in years. Use CouchDB
-native attachments or ActiveStorage instead.
+SimplyCouch can store file attachments in **AWS S3** (or any S3-compatible service like MinIO).
+Uses the officially maintained `aws-sdk-s3` gem.
+
+#### Setup
+
+Add to your Gemfile:
+
+```ruby
+gem 'aws-sdk-s3'
+```
+
+Configure global defaults (per environment):
+
+```ruby
+# config/initializers/simply_couch.rb
+SimplyCouch.s3_defaults = {
+  bucket: 'myapp-development',
+  access_key: ENV['S3_ACCESS_KEY'],
+  secret_access_key: ENV['S3_SECRET_KEY'],
+  location: :eu  # :us or :eu, defaults to :us
+}
+
+# Or load from a YAML file with ERB:
+SimplyCouch.load_s3_config(Rails.root.join('config', 's3.yml'))
+
+# Or from Rails encrypted credentials:
+SimplyCouch.s3_defaults = Rails.application.credentials.s3
+```
+
+A typical `config/s3.yml`:
+
+```yaml
+development:
+  bucket: myapp-dev
+  access_key: dev-key
+  secret_access_key: dev-secret
+
+production:
+  bucket: myapp-prod
+  access_key: <%= ENV['S3_ACCESS_KEY'] %>
+  secret_access_key: <%= ENV['S3_SECRET_KEY'] %>
+  location: eu
+```
+
+#### Usage
+
+```ruby
+class Report
+  include SimplyCouch::Model
+
+  has_s3_attachment :pdf  # uses defaults from SimplyCouch.s3_defaults
+  has_s3_attachment :thumbnail, bucket: 'thumbnails'  # override bucket
+end
+
+report = Report.new
+report.pdf = File.read('monthly.pdf')          # assign content
+report.pdf = ['line1', 'line2']                # arrays serialized to JSON
+report.save                                     # uploads to S3
+report.pdf_size                                 # => 24501 (bytes)
+report.pdf_url                                  # presigned URL
+
+# Read back
+report.pdf                                      # fetches from S3 on first access
+
+# Delete
+report.destroy                                  # also deletes from S3 if configured
+```
+
+#### Configuration options
+
+| Option | Default | Description |
+|---|---|---|
+| `bucket` | *(required)* | S3 bucket name |
+| `access_key` | *(required)* | AWS access key ID |
+| `secret_access_key` | *(required)* | AWS secret access key |
+| `location` | `:us` | `:us` (us-east-1) or `:eu` (eu-west-1) |
+| `permissions` | `'private'` | S3 ACL: `'private'`, `'public-read'`, etc. |
+| `after_delete` | `:nothing` | `:delete` to remove from S3 on destroy |
+| `logger` | `nil` | Custom logger for S3 operations |
+
+> **Historical note:** The original simply_stored shipped with `right_aws` (unmaintained for years).
+> In June 2026 this was replaced with `aws-sdk-s3` — same API surface, maintained gem,
+> supports S3-compatible services like MinIO.
 
 ## Dependencies
 
