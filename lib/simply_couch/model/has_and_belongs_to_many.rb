@@ -49,16 +49,12 @@ module SimplyCouch
         eos
 
         reduce_definition = options[:class_storing_keys] == self.name ? "_sum" : <<-eos
-          function(key, values) {
-            var sum = 0;
-            for (var i in values){
-              if (typeof(i) == 'number'){
-                sum = sum + i;
-              } else {
-                sum = sum + 1;
-              }
+          function(key, values, rereduce) {
+            if (rereduce) {
+              return sum(values);
+            } else {
+              return values.length;
             }
-            return sum;
           }
         eos
 
