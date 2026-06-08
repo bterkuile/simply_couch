@@ -97,6 +97,22 @@ module SimplyCouch
             end
           end
 
+          # Move files from tmp/ to real ID directory after first save
+          base.after_save :"_move_attachment_#{name}_from_tmp"
+          base.define_method(:"_move_attachment_#{name}_from_tmp") do
+            tmp_dir = Rails.root.join('public', 'system', name.to_s, 'tmp')
+            next unless File.directory?(tmp_dir)
+
+            real_dir = Rails.root.join('public', 'system', name.to_s, _id)
+            FileUtils.mv(tmp_dir.to_s, real_dir.to_s)
+          rescue Errno::ENOTEMPTY, Errno::EEXIST
+            # real dir already exists (re-save) — merge files
+            Dir.glob(File.join(tmp_dir, '*')).each do |f|
+              FileUtils.mv(f, File.join(real_dir, File.basename(f)))
+            end
+            FileUtils.rmdir(tmp_dir) rescue nil
+          end
+
           # Register configuration
           base.attachment_registry[name] = {
             styles: styles,
