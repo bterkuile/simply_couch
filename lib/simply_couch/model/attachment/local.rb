@@ -42,10 +42,6 @@ module SimplyCouch
           end
           alias exist? file?
 
-          def path(style = :original)
-            @record.send(:"#{@name}_path", style)
-          end
-
           def url(style = nil)
             @record.send(:"#{@name}_url", style)
           end
@@ -68,6 +64,11 @@ module SimplyCouch
             else
               super
             end
+          end
+
+          def path(style = :original)
+            return nil unless present?
+            Rails.root.join('public', url(style).sub(%r{^/}, ''))
           end
 
           def respond_to_missing?(method, include_private = false)
