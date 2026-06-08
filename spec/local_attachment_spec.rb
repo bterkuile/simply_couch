@@ -20,7 +20,7 @@ describe 'has_local_attached' do
     obj = DefaultStyleTest.new
     obj.file_file_name = 'test.jpg'
 
-    expect(obj.file.url).to end_with '/system/file/tmp/not_original.jpg'
+    expect(obj.file.path.to_s).to end_with '/system/file/tmp/not_original.jpg'
   end
 
   it 'allows explicit style override' do
