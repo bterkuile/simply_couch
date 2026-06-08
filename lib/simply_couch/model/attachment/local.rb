@@ -100,17 +100,20 @@ module SimplyCouch
           # Move files from tmp/ to real ID directory after first save
           base.after_save :"_move_attachment_#{name}_from_tmp"
           base.define_method(:"_move_attachment_#{name}_from_tmp") do
-            tmp_dir = Rails.root.join('public', 'system', name.to_s, 'tmp')
+            token = instance_variable_get(:"@_attachment_#{name}_tmp_token")
+            return unless token
+            instance_variable_set(:"@_attachment_#{name}_tmp_token", nil)
+
+            tmp_dir = Rails.root.join('public', 'system', name.to_s, token)
             next unless File.directory?(tmp_dir)
 
             real_dir = Rails.root.join('public', 'system', name.to_s, _id)
-            FileUtils.mv(tmp_dir.to_s, real_dir.to_s)
-          rescue Errno::ENOTEMPTY, Errno::EEXIST
-            # real dir already exists (re-save) — merge files
-            Dir.glob(File.join(tmp_dir, '*')).each do |f|
-              FileUtils.mv(f, File.join(real_dir, File.basename(f)))
+            if File.directory?(real_dir)
+              Dir.glob(File.join(tmp_dir, '*')).each { |f| FileUtils.mv(f, File.join(real_dir, File.basename(f))) }
+              FileUtils.rmdir(tmp_dir) rescue nil
+            else
+              FileUtils.mv(tmp_dir.to_s, real_dir.to_s)
             end
-            FileUtils.rmdir(tmp_dir) rescue nil
           end
 
           # Register configuration
@@ -160,7 +163,13 @@ module SimplyCouch
                         uploaded.to_s
                       end
 
-            record_id = respond_to?(:id) && id.present? ? id.to_s : 'tmp'
+            record_id = if respond_to?(:id) && id.present?
+                          id.to_s
+                        else
+                          token = SecureRandom.urlsafe_base64(8)
+                          instance_variable_set(:"@_attachment_#{name}_tmp_token", token)
+                          token
+                        end
             base_dir = Rails.root.join('public', 'system', name.to_s, record_id)
             FileUtils.mkdir_p(base_dir)
 
@@ -213,7 +222,11 @@ module SimplyCouch
             end
 
             ext = File.extname(fname)
-            record_id = respond_to?(:id) && id.present? ? id.to_s : 'tmp'
+            record_id = if respond_to?(:id) && id.present?
+                          id.to_s
+                        else
+                          instance_variable_get(:"@_attachment_#{name}_tmp_token") || 'tmp'
+                        end
             "/system/#{name}/#{record_id}/#{style_name}#{ext}"
           end
 
