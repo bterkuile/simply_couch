@@ -34,15 +34,18 @@ module SimplyCouch
                                  name
                                end
 
+        soft_delete_check = if soft_delete_attribute
+                              %{if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){ return; }}
+                            else
+                              ''
+                            end
+
         map_definition_without_deleted = <<-eos
           function(doc) {
             if (doc['ruby_class'] == '#{options[:class_storing_keys]}' && doc['#{options[:foreign_key]}'] != null) {
-              if (doc['#{soft_delete_attribute}'] && doc['#{soft_delete_attribute}'] != null){
-                // "soft" deleted
-              }else{
-                for (var index in doc.#{options[:foreign_key]}) {
-                  emit([#{key_order}], #{value});
-                }
+              #{soft_delete_check}
+              for (var index in doc.#{options[:foreign_key]}) {
+                emit([#{key_order}], #{value});
               }
             }
           }
