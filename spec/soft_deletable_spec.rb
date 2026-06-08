@@ -37,7 +37,7 @@ RSpec.describe 'SoftDeletable' do
 
     context 'when deleting' do
       before do
-        @user = User.new(:name => 'BigT', :title => 'Dr.')
+        @user = User.new(name: 'BigT', title: 'Dr.')
         @user.save!
         @hemorrhoid = Hemorrhoid.new
         @hemorrhoid.user = @user
@@ -163,23 +163,23 @@ RSpec.describe 'SoftDeletable' do
           @hemorrhoid.delete
           @sub.reload
           expect(@sub.deleted?).to be true
-          expect { EasySubHemorrhoid.find(@easy_sub.id, :with_deleted => true) }.to raise_error(SimplyCouch::RecordNotFound)
+          expect { EasySubHemorrhoid.find(@easy_sub.id, with_deleted: true) }.to raise_error(SimplyCouch::RecordNotFound)
           @rash = Rash.find(@rash.id)
           expect(@rash.hemorrhoid_id).to be_nil
         end
 
         it 'really deletes them if the parent is really deleted' do
           @hemorrhoid.delete!
-          expect { EasySubHemorrhoid.find(@sub.id, :with_deleted => true) }.to raise_error(SimplyCouch::RecordNotFound)
+          expect { EasySubHemorrhoid.find(@sub.id, with_deleted: true) }.to raise_error(SimplyCouch::RecordNotFound)
 
-          expect { EasySubHemorrhoid.find(@easy_sub.id, :with_deleted => true) }.to raise_error(SimplyCouch::RecordNotFound)
+          expect { EasySubHemorrhoid.find(@easy_sub.id, with_deleted: true) }.to raise_error(SimplyCouch::RecordNotFound)
 
           @rash = Rash.find(@rash.id)
           expect(@rash.hemorrhoid_id).to be_nil
         end
 
         it 'nullifies dependents if they are soft-deletable and deleted' do
-          small_rash = SmallRash.create(:hemorrhoid => @hemorrhoid)
+          small_rash = SmallRash.create(hemorrhoid: @hemorrhoid)
           @hemorrhoid.reload
           @hemorrhoid.destroy
           expect(@hemorrhoid.deleted?).to be true
@@ -188,7 +188,7 @@ RSpec.describe 'SoftDeletable' do
         end
 
         it 'does not nullify dependents if they are soft-deletable and not deleted' do
-          small_rash = SmallRash.create(:hemorrhoid => @hemorrhoid)
+          small_rash = SmallRash.create(hemorrhoid: @hemorrhoid)
           @hemorrhoid.reload
           expect(@hemorrhoid.deleted?).to be false
           small_rash = SmallRash.find(small_rash.id)
@@ -200,7 +200,7 @@ RSpec.describe 'SoftDeletable' do
 
     context 'when loading' do
       before do
-        @user = User.new(:name => 'BigT', :title => 'Dr.')
+        @user = User.new(name: 'BigT', title: 'Dr.')
         @user.save!
         @hemorrhoid = Hemorrhoid.new
         @hemorrhoid.user = @user
@@ -216,7 +216,7 @@ RSpec.describe 'SoftDeletable' do
         it 'is found if supplied with :with_deleted' do
           @hemorrhoid.destroy
 
-          expect(Hemorrhoid.find(@hemorrhoid.id, :with_deleted => true)).not_to be_nil
+          expect(Hemorrhoid.find(@hemorrhoid.id, with_deleted: true)).not_to be_nil
         end
 
         it 'is not found if it is really gone' do
@@ -243,17 +243,17 @@ RSpec.describe 'SoftDeletable' do
 
         it 'does not load deleted' do
           expect(Hemorrhoid.find(:all)).to eq []
-          expect(Hemorrhoid.find(:all, :with_deleted => false)).to eq []
+          expect(Hemorrhoid.find(:all, with_deleted: false)).to eq []
         end
 
         it 'loads non-deleted' do
           hemorrhoid = Hemorrhoid.create
           expect(Hemorrhoid.find(:all)).not_to eq []
-          expect(Hemorrhoid.find(:all, :with_deleted => false)).not_to eq []
+          expect(Hemorrhoid.find(:all, with_deleted: false)).not_to eq []
         end
 
         it 'loads deleted if asked to' do
-          expect(Hemorrhoid.find(:all, :with_deleted => true).map(&:id)).to eq [@hemorrhoid.id]
+          expect(Hemorrhoid.find(:all, with_deleted: true).map(&:id)).to eq [@hemorrhoid.id]
         end
       end
 
@@ -267,70 +267,70 @@ RSpec.describe 'SoftDeletable' do
 
         it 'does not load deleted' do
           expect(Hemorrhoid.find(:first)).to be_nil
-          expect(Hemorrhoid.find(:first, :with_deleted => false)).to be_nil
+          expect(Hemorrhoid.find(:first, with_deleted: false)).to be_nil
         end
 
         it 'loads non-deleted' do
           hemorrhoid = Hemorrhoid.create
           expect(Hemorrhoid.find(:first)).not_to be_nil
           expect(Hemorrhoid.find(:first)).to be_a(Hemorrhoid)
-          expect(Hemorrhoid.find(:first, :with_deleted => false)).not_to be_nil
-          expect(Hemorrhoid.find(:first, :with_deleted => false)).to be_a(Hemorrhoid)
+          expect(Hemorrhoid.find(:first, with_deleted: false)).not_to be_nil
+          expect(Hemorrhoid.find(:first, with_deleted: false)).to be_a(Hemorrhoid)
         end
 
         it 'loads deleted if asked to' do
-          expect(Hemorrhoid.find(:first, :with_deleted => true)).to eq @hemorrhoid
+          expect(Hemorrhoid.find(:first, with_deleted: true)).to eq @hemorrhoid
         end
       end
 
       context 'find_by and find_all_by' do
         before do
           recreate_db!
-          @hemorrhoid = Hemorrhoid.create(:nickname => 'Claas', :size => 3)
+          @hemorrhoid = Hemorrhoid.create(nickname: 'Claas', size: 3)
           @hemorrhoid.destroy
         end
 
         context 'find_by' do
           it 'does not load deleted' do
             expect(Hemorrhoid.find_by_nickname('Claas')).to be_nil
-            expect(Hemorrhoid.find_by_nickname('Claas', :with_deleted => false)).to be_nil
+            expect(Hemorrhoid.find_by_nickname('Claas', with_deleted: false)).to be_nil
 
             expect(Hemorrhoid.find_by_nickname_and_size('Claas', 3)).to be_nil
-            expect(Hemorrhoid.find_by_nickname_and_size('Claas', 3, :with_deleted => false)).to be_nil
+            expect(Hemorrhoid.find_by_nickname_and_size('Claas', 3, with_deleted: false)).to be_nil
           end
 
           it 'loads non-deleted' do
-            hemorrhoid = Hemorrhoid.create(:nickname => 'OtherNick', :size => 3)
-            expect(Hemorrhoid.find_by_nickname('OtherNick', :with_deleted => true).id).to eq hemorrhoid.id
+            hemorrhoid = Hemorrhoid.create(nickname: 'OtherNick', size: 3)
+            expect(Hemorrhoid.find_by_nickname('OtherNick', with_deleted: true).id).to eq hemorrhoid.id
             expect(Hemorrhoid.find_by_nickname('OtherNick').id).to eq hemorrhoid.id
           end
 
           it 'loads deleted if asked to' do
-            expect(Hemorrhoid.find_by_nickname('Claas', :with_deleted => true)).not_to be_nil
-            expect(Hemorrhoid.find_by_nickname('Claas', :with_deleted => true).id).to eq @hemorrhoid.id
+            expect(Hemorrhoid.find_by_nickname('Claas', with_deleted: true)).not_to be_nil
+            expect(Hemorrhoid.find_by_nickname('Claas', with_deleted: true).id).to eq @hemorrhoid.id
 
-            expect(Hemorrhoid.find_by_nickname_and_size('Claas', 3, :with_deleted => true)).not_to be_nil
-            expect(Hemorrhoid.find_by_nickname_and_size('Claas', 3, :with_deleted => true).id).to eq @hemorrhoid.id
+            expect(Hemorrhoid.find_by_nickname_and_size('Claas', 3, with_deleted: true)).not_to be_nil
+            expect(Hemorrhoid.find_by_nickname_and_size('Claas', 3, with_deleted: true).id).to eq @hemorrhoid.id
           end
         end
 
         context 'find_all_by' do
           it 'does not load deleted' do
             expect(Hemorrhoid.find_all_by_nickname('Claas')).to eq []
-            expect(Hemorrhoid.find_all_by_nickname('Claas', :with_deleted => false)).to eq []
+            expect(Hemorrhoid.find_all_by_nickname('Claas', with_deleted: false)).to eq []
 
             expect(Hemorrhoid.find_all_by_nickname_and_size('Claas', 3)).to eq []
-            expect(Hemorrhoid.find_all_by_nickname_and_size('Claas', 3, :with_deleted => false)).to eq []
+            expect(Hemorrhoid.find_all_by_nickname_and_size('Claas', 3, with_deleted: false)).to eq []
           end
 
           it 'loads non-deleted' do
-            hemorrhoid = Hemorrhoid.create(:nickname => 'Lampe', :size => 4)
+            hemorrhoid = Hemorrhoid.create(nickname: 'Lampe', size: 4)
             expect(Hemorrhoid.find_all_by_nickname('Lampe').map(&:id)).to eq [hemorrhoid.id]
           end
 
           it 'loads deleted if asked to' do
-            expect(Hemorrhoid.find_all_by_nickname('Claas', :with_deleted => true).map(&:id)).to eq [@hemorrhoid.id]
-            expect(Hemorrhoid.find_all_by_nickname_and_size('Claas', 3, :with_deleted => true).map(&:id)).to eq [@hemorrhoid.id]
+            expect(Hemorrhoid.find_all_by_nickname('Claas', with_deleted: true).map(&:id)).to eq [@hemorrhoid.id]
+            expect(Hemorrhoid.find_all_by_nickname_and_size('Claas', 3, with_deleted: true).map(&:id)).to eq [@hemorrhoid.id]
           end
         end
 
@@ -352,17 +352,17 @@ RSpec.describe 'SoftDeletable' do
 
         context 'has_many' do
           it 'does not load deleted by default' do
-            expect(@user.hemorrhoids(:force_reload => true)).to eq []
+            expect(@user.hemorrhoids(force_reload: true)).to eq []
           end
 
           it 'loads deleted if asked to' do
-            expect(@user.hemorrhoids(:force_reload => true, :with_deleted => true).map(&:id)).to eq [@hemorrhoid.id]
+            expect(@user.hemorrhoids(force_reload: true, with_deleted: true).map(&:id)).to eq [@hemorrhoid.id]
           end
         end
 
         context 'has_many :through' do
           before do
-            @user = User.create(:name => 'BigT', :title => 'Dr.')
+            @user = User.create(name: 'BigT', title: 'Dr.')
             @pain = Pain.create
 
             @hemorrhoid = Hemorrhoid.new
@@ -378,7 +378,7 @@ RSpec.describe 'SoftDeletable' do
           end
 
           it 'loads deleted if asked to' do
-            expect(@user.pains(:with_deleted => true).map(&:id)).to eq [@pain.id]
+            expect(@user.pains(with_deleted: true).map(&:id)).to eq [@pain.id]
           end
         end
 
@@ -394,11 +394,11 @@ RSpec.describe 'SoftDeletable' do
           end
 
           it 'does not load deleted by default' do
-            expect(@spot.hemorrhoid(:force_reload => true)).to be_nil
+            expect(@spot.hemorrhoid(force_reload: true)).to be_nil
           end
 
           it 'loads deleted if asked to' do
-            expect(@spot.hemorrhoid(:force_reload => true, :with_deleted => true).id).to eq @hemorrhoid.id
+            expect(@spot.hemorrhoid(force_reload: true, with_deleted: true).id).to eq @hemorrhoid.id
           end
         end
 
@@ -416,12 +416,12 @@ RSpec.describe 'SoftDeletable' do
 
           it 'does not load deleted by default' do
             @sub.reload
-            expect(@sub.hemorrhoid(:force_reload => true)).to be_nil
+            expect(@sub.hemorrhoid(force_reload: true)).to be_nil
           end
 
           it 'loads deleted if asked to' do
             @sub.reload
-            expect(@sub.hemorrhoid(:force_reload => true, :with_deleted => true).id).to eq @hemorrhoid.id
+            expect(@sub.hemorrhoid(force_reload: true, with_deleted: true).id).to eq @hemorrhoid.id
           end
         end
       end
@@ -429,34 +429,34 @@ RSpec.describe 'SoftDeletable' do
 
     context 'when counting' do
       before do
-        @hemorrhoid = Hemorrhoid.create(:nickname => 'Claas')
+        @hemorrhoid = Hemorrhoid.create(nickname: 'Claas')
         expect(@hemorrhoid.destroy).to be_truthy
         expect(@hemorrhoid.reload.deleted?).to be true
       end
 
       it 'does not count deleted' do
         expect(Hemorrhoid.count).to eq 0
-        expect(Hemorrhoid.count(:with_deleted => false)).to eq 0
+        expect(Hemorrhoid.count(with_deleted: false)).to eq 0
       end
 
       it 'counts non-deleted' do
-        hemorrhoid = Hemorrhoid.create(:nickname => 'Claas')
+        hemorrhoid = Hemorrhoid.create(nickname: 'Claas')
         expect(Hemorrhoid.count).to eq 1
-        expect(Hemorrhoid.count(:with_deleted => false)).to eq 1
+        expect(Hemorrhoid.count(with_deleted: false)).to eq 1
       end
 
       it 'counts deleted if asked to' do
-        expect(Hemorrhoid.count(:with_deleted => true)).to eq 1
+        expect(Hemorrhoid.count(with_deleted: true)).to eq 1
       end
 
       context 'count_by' do
         it 'does not count deleted' do
           expect(Hemorrhoid.count_by_nickname('Claas')).to eq 0
-          expect(Hemorrhoid.count_by_nickname('Claas', :with_deleted => false)).to eq 0
+          expect(Hemorrhoid.count_by_nickname('Claas', with_deleted: false)).to eq 0
         end
 
         it 'counts deleted if asked to' do
-          expect(Hemorrhoid.count_by_nickname('Claas', :with_deleted => true)).to eq 1
+          expect(Hemorrhoid.count_by_nickname('Claas', with_deleted: true)).to eq 1
         end
       end
     end
