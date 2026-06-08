@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'Instance lifecycle' do
   context 'design documents' do
-    let(:db_url) { 'http://127.0.0.1:5984/simply_couch_test' }
+    let(:db_url) { "#{COUCHDB_URL}/#{TEST_DB}" }
 
     it 'deletes all' do
       expect(SimplyCouch::Model.delete_all_design_documents(db_url)).to eq 0
@@ -44,7 +44,7 @@ describe 'Instance lifecycle' do
       end
 
       it 'raises an error when the validations failed' do
-        expect { User.create!(title: nil) }.to raise_error(CouchPotato::Database::ValidationsFailedError)
+        expect { User.create!(title: nil) }.to raise_error(RuntimeError, /Validations failed/)
       end
     end
 
@@ -84,7 +84,7 @@ describe 'Instance lifecycle' do
     context 'when using save!' do
       it 'raises an exception when a validation is not fulfilled' do
         user = User.new
-        expect { user.save! }.to raise_error(CouchPotato::Database::ValidationsFailedError)
+        expect { user.save! }.to raise_error(RuntimeError, /Validations failed/)
       end
     end
 
