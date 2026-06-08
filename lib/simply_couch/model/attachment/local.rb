@@ -168,6 +168,11 @@ module SimplyCouch
             Proxy.new(self, name)
           end
 
+          # ---- Presence check: model.file? ----
+          base.define_method(:"#{name}?") do
+            send(:"#{name}_file_name").present?
+          end
+
           # ---- URL helper: model.file_url(:thumb) ----
           base.define_method(:"#{name}_url") do |style_name = nil|
             config = self.class.attachment_registry[name]
