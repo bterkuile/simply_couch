@@ -9,11 +9,18 @@ describe 'has_local_attached' do
     end
   end
 
-  it 'uses default_style when no style given' do
+  it 'uses default_style when no style given for url' do
     obj = DefaultStyleTest.new
     obj.file_file_name = 'test.jpg'
 
     expect(obj.file.url).to eq '/system/file/tmp/not_original.jpg'
+  end
+
+  it 'uses default_style when no style given for path' do
+    obj = DefaultStyleTest.new
+    obj.file_file_name = 'test.jpg'
+
+    expect(obj.file.url).to end_with '/system/file/tmp/not_original.jpg'
   end
 
   it 'allows explicit style override' do

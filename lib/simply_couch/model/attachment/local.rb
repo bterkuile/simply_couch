@@ -206,7 +206,7 @@ module SimplyCouch
             url = send(:"#{name}_url", style_name)
             return nil if url.nil?
             root = defined?(Rails) ? Rails.root : Pathname.new(Dir.pwd)
-            root.join('public', url.sub(%r{^/}, ''))
+            root.join('public', url.sub(%r{^/}, '')).to_s
           end
         end
 
