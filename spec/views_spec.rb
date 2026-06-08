@@ -8,10 +8,6 @@ class CustomViewUser
 end
 
 describe "Custom couch views" do
-  before do
-    recreate_db
-  end
-
   context "with array views" do
     it "finds objects with one match of the array" do
       CustomViewUser.create(tags: ["agile", "cool", "extreme"])
