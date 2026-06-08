@@ -12,7 +12,10 @@ module SimplyCouch
         alias_method property_getter_method, name
         define_method(name) do |*args|
           current = instance_variable_get("@#{name}")
-          return  current if current && current.respond_to?(:parent_object_set?)
+          if current && current.respond_to?(:parent_object_set?)
+            current.each { |o| o.parent_object = self }
+            return current
+          end
           # Rebuild current, ensure parent object
           current = Array.wrap(self.send(property_getter_method)).map do |h|
             if h.is_a?(options[:class_name].constantize)
@@ -160,13 +163,13 @@ module SimplyCouch
         
         def build(object, json)
           values = Array.wrap(json[name]).map do |v|
-            if v.is_a?(Hash)
-              obj = options[:class_name].constantize.new
-              obj._document = v
-              obj
-            else
-              v
-            end
+            obj = if v.is_a?(Hash)
+                    options[:class_name].constantize.new.tap { |o| o._document = v }
+                  else
+                    v
+                  end
+            obj.parent_object = object
+            obj
           end
           values.define_singleton_method(:parent_object_set?) { true }
           values.each_with_index { |v, i| v.index = i }

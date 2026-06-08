@@ -26,6 +26,10 @@ module SimplyCouch
           attr_accessor :_id, :_rev, :_deleted, :_attachments, :database, :_document
           alias_method :id, :_id
           alias_method :id=, :_id=
+
+          def _document=(val)
+            @_document = val.is_a?(Hash) ? ActiveSupport::HashWithIndifferentAccess.new(val) : val
+          end
         end
       end
 
