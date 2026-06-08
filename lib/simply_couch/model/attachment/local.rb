@@ -38,10 +38,13 @@ module SimplyCouch
 
           def file?
             return false unless present?
-            path = send(:"#{name}_path", :original)
             File.exist?(path.to_s)
           end
           alias exist? file?
+
+          def path(style = :original)
+            @record.send(:"#{@name}_path", style)
+          end
 
           def url(style = nil)
             @record.send(:"#{@name}_url", style)
@@ -121,6 +124,9 @@ module SimplyCouch
                                 end
             ext = File.extname(original_filename)
             ext = '.bin' if ext.blank?
+
+            # Invalidate memoized proxy
+            remove_instance_variable(:"@_attachment_proxy_#{name}") if instance_variable_defined?(:"@_attachment_proxy_#{name}")
 
             content_type = uploaded.respond_to?(:content_type) ? uploaded.content_type : nil
             file_size    = uploaded.respond_to?(:size) ? uploaded.size : nil
