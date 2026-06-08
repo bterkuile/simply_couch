@@ -59,8 +59,16 @@ module SimplyCouch
       include SimplyCouch::Model::FindBy
       include SimplyCouch::Model::Pagination
       include SimplyCouch::Model::PaginationOptions
-      include SimplyCouch::Storage::ClassMethods
       include SimplyCouch::Model::Ancestry
+
+      # Declare an S3 attachment.
+      # Lazy-loads + includes SimplyCouch::Model::Attachment::S3.
+      def has_s3_attached(name, options = {})
+        require 'simply_couch/model/attachment/s3'
+        include SimplyCouch::Model::Attachment::S3::InstanceMethods unless included_modules.include?(SimplyCouch::Model::Attachment::S3::InstanceMethods)
+        SimplyCouch::Model::Attachment::S3.define_s3_attached(self, name, options)
+      end
+      alias_method :has_s3_attachment, :has_s3_attached
 
       # Declare a CouchDB inline attachment.
       # Lazy-loads + includes SimplyCouch::Model::Attachment::Couch.
