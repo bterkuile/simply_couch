@@ -67,8 +67,9 @@ module SimplyCouch
           end
 
           def path(style = :original)
-            return nil unless present?
-            Rails.root.join('public', url(style).sub(%r{^/}, ''))
+            u = url(style)
+            return nil if u.nil?
+            Rails.root.join('public', u.sub(%r{^/}, ''))
           end
 
           def respond_to_missing?(method, include_private = false)
@@ -201,17 +202,11 @@ module SimplyCouch
             "/system/#{name}/#{record_id}/#{style_name}#{ext}"
           end
 
-          # ---- Backward compat: *_path for Paperclip migrations ----
+          # ---- Backward compat: *_path derives from *_url ----
           base.define_method(:"#{name}_path") do |style_name = nil|
-            config = self.class.attachment_registry[name]
-            style_name ||= config[:default_style]
-
-            fname = send(:"#{name}_file_name")
-            return nil if fname.blank?
-
-            ext = File.extname(fname)
-            record_id = respond_to?(:id) && id.present? ? id.to_s : 'tmp'
-            Rails.root.join('public', 'system', name.to_s, record_id, "#{style_name}#{ext}").to_s
+            url = send(:"#{name}_url", style_name)
+            return nil if url.nil?
+            Rails.root.join('public', url.sub(%r{^/}, ''))
           end
         end
 
