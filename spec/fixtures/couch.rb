@@ -126,6 +126,7 @@ class Magazine
 end
 
 
+
 class UniqueUser
   include SimplyCouch::Model
 
