@@ -36,6 +36,9 @@ module SimplyCouch
             !present?
           end
 
+          alias file? present?
+          alias exists? present?
+
           def url(style = nil)
             @record.send(:"#{@name}_url", style)
           end
