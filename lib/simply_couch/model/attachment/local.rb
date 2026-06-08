@@ -170,7 +170,10 @@ module SimplyCouch
 
           # ---- Presence check: model.file? ----
           base.define_method(:"#{name}?") do
-            send(:"#{name}_file_name").present?
+            fname = send(:"#{name}_file_name")
+            return false if fname.blank?
+            path = send(:"#{name}_path", :original)
+            File.exist?(path.to_s)
           end
 
           # ---- URL helper: model.file_url(:thumb) ----
