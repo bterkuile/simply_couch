@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'Instance lifecycle' do
   context 'design documents' do
-    let(:db_url) { "#{COUCHDB_URL}/#{TEST_DB}" }
+    let(:db_url) { SimplyCouch.database_url }
 
     it 'deletes all' do
       expect(SimplyCouch::Model.delete_all_design_documents(db_url)).to eq 0
