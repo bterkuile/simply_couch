@@ -27,6 +27,15 @@ module SimplyCouch
   #   3. SimplyCouch.database_url (global default)
 
   mattr_accessor :database_url
+  mattr_accessor :s3_defaults
+
+  # Load S3 defaults from a YAML config file (Rails-style per-environment).
+  #   SimplyCouch.load_s3_config(Rails.root.join('config', 's3.yml'))
+  def self.load_s3_config(path, env = nil)
+    env ||= defined?(Rails) ? Rails.env : 'development'
+    config = YAML.load_file(path.to_s, aliases: true)
+    self.s3_defaults = (config[env] || {}).deep_symbolize_keys
+  end
 
   # Returns a DatabaseInstance for the given URL, caching by URL.
   def self.database_for(url)

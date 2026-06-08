@@ -134,17 +134,19 @@ module SimplyCouch
           end
         end
 
-        raise ArgumentError, "No bucket name specified for attachment #{name}" if options[:bucket].blank?
-        options = {
+        # Merge: model options > global s3_defaults > gem defaults
+        defaults = (SimplyCouch.s3_defaults || {}).merge(options)
+        raise ArgumentError, "No bucket name specified for attachment #{name}" if defaults[:bucket].blank?
+        defaults = {
           permissions: 'private',
           ssl: true,
           location: :us,
           ca_file: nil,
           after_delete: :nothing,
           logger: nil
-        }.update(options)
+        }.update(defaults)
         self._s3_options ||= {}
-        self._s3_options[name] = options
+        self._s3_options[name] = defaults
 
         define_attachment_accessors(name)
         attr_reader :_s3_attachments
