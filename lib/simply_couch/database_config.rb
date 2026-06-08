@@ -29,11 +29,16 @@ module SimplyCouch
   mattr_accessor :database_url
   mattr_accessor :s3_defaults
 
-  # Load S3 defaults from a YAML config file (Rails-style per-environment).
+  # Load S3 defaults from a YAML config file with ERB support.
   #   SimplyCouch.load_s3_config(Rails.root.join('config', 's3.yml'))
+  #
+  # Supports Rails credentials directly:
+  #   SimplyCouch.s3_defaults = Rails.application.credentials.s3
   def self.load_s3_config(path, env = nil)
     env ||= defined?(Rails) ? Rails.env : 'development'
-    config = YAML.load_file(path.to_s, aliases: true)
+    raw = File.read(path.to_s)
+    yaml = defined?(ERB) ? ERB.new(raw).result : raw
+    config = YAML.safe_load(yaml, permitted_classes: [], permitted_symbols: [], aliases: true) || {}
     self.s3_defaults = (config[env] || {}).deep_symbolize_keys
   end
 
