@@ -87,9 +87,9 @@ describe "Finder" do
       end
 
       it "create a method to prevent future loops through method_missing" do
-        User.should_not respond_to :find_by_title
+        expect(User).to receive(:method_missing).and_call_original
         User.find_by_title("Mr.")
-        User.should respond_to :find_by_title
+        User.find_by_title("Mrs.")
       end
 
       it "call the generated view and return the result" do
@@ -158,9 +158,9 @@ describe "Finder" do
       end
 
       it "create a method to prevent future loops through method_missing" do
-        User.should_not respond_to :find_all_by_foo_attribute
+        expect(User).to receive(:method_missing).and_call_original
         User.find_all_by_foo_attribute("Mr.")
-        User.should respond_to :find_all_by_foo_attribute
+        User.find_all_by_foo_attribute("Mrs.")
       end
 
       it "call the generated view and return the result" do
