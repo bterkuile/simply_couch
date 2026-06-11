@@ -6,6 +6,7 @@ module SimplyCouch
       def is_embedded_in(name, options = {})
         check_existing_properties(name, SimplyCouch::Model::BelongsTo::Property)
         parent = options[:class_name] || name.to_s.camelize
+        SimplyCouch.assert_safe_view_token!(self.to_s, name, parent, soft_delete_attribute)
         self.name.property_name.pluralize
 
         soft_delete_check = if soft_delete_attribute

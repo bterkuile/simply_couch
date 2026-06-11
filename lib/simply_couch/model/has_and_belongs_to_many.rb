@@ -16,6 +16,7 @@ module SimplyCouch
       end
 
       def define_has_and_belongs_to_many_views(name, options)
+        SimplyCouch.assert_safe_view_token!(self.name, name, options[:class_storing_keys], options[:foreign_key], soft_delete_attribute)
         key_order = options[:class_storing_keys] == self.name ? "doc.#{options[:foreign_key]}[index], doc._id" : "doc._id, doc.#{options[:foreign_key]}[index]"
         value = options[:class_storing_keys] == self.name ? 1 : "{ _id :doc.#{options[:foreign_key]}[index]}"
         association_property = if name.to_s.index('__')
