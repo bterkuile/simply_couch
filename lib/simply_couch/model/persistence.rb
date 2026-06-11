@@ -72,7 +72,6 @@ module SimplyCouch
         return super if _id.nil?
         [self.class, _id, _rev].hash
       end
-      def reload; database.load id; end
 
       def inspect
         attrs = attributes.map {|k,v| "#{k}: #{v.inspect}"}.join(", ")
