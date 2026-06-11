@@ -38,8 +38,13 @@ module SimplyCouch
       def initialize(attributes = {})
         if attributes
           @skip_dirty_tracking = true
-          self.attributes = attributes
-          @skip_dirty_tracking = false
+          begin
+            self.attributes = attributes
+          ensure
+            # Always restore tracking, even if a setter raises, so the instance
+            # isn't left permanently ignoring dirty state.
+            @skip_dirty_tracking = false
+          end
         end
         yield self if block_given?
       end
@@ -242,11 +247,21 @@ module SimplyCouch
           base.class_eval { after_save :clear_changes_information }
         end
         private
+        # Deep-copy a (default) attribute value so instances never share mutable
+        # state. Recurses through Hash/Array instead of Marshal.dump/load, which
+        # is both lighter and avoids the Marshal round-trip (Marshal can't dump
+        # some objects and is flagged by security scanners). Preserves the hash
+        # subclass (e.g. HashWithIndifferentAccess).
         def clone_attribute(value)
-          if [Integer, Symbol, TrueClass, FalseClass, NilClass, Float].any? {|k| value.is_a?(k)}
+          case value
+          when Integer, Symbol, TrueClass, FalseClass, NilClass, Float
             value
-          elsif [Hash, Array].include?(value.class)
-            Marshal.load(Marshal.dump(value))
+          when Array
+            value.map { |element| clone_attribute(element) }
+          when Hash
+            value.each_with_object(value.class.new) do |(k, v), copy|
+              copy[clone_attribute(k)] = clone_attribute(v)
+            end
           else
             value.clone
           end
