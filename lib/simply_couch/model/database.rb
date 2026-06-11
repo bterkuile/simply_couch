@@ -152,6 +152,68 @@ module SimplyCouch
         docs
       end
 
+      # Persist many documents via CouchDB's _bulk_docs endpoint in one request.
+      # Callbacks are intentionally skipped (see SimplyCouch::Model::Bulk);
+      # timestamps are maintained directly. Returns
+      #   { saved: [...], invalid: [...], failed: [[doc, error], ...] }
+      def bulk_save(documents, validate = true)
+        documents = Array(documents)
+        return { saved: [], invalid: [], failed: [] } if documents.empty?
+
+        invalid    = []
+        persisting = []
+        payload    = []
+        now        = Time.now
+
+        documents.each do |document|
+          document.database = self
+          document.created_at ||= now if document.respond_to?(:created_at) && document.new?
+          document.updated_at   = now if document.respond_to?(:updated_at=)
+
+          if validate
+            document.errors.clear
+            unless valid_document?(document)
+              invalid << document
+              next
+            end
+          end
+
+          persisting << document
+          payload    << document.to_hash
+        end
+
+        return { saved: [], invalid: invalid, failed: [] } if payload.empty?
+
+        rows   = Array(couchrest_database.bulk_save(payload))
+        saved  = []
+        failed = []
+
+        persisting.each_with_index do |document, i|
+          row = rows[i]
+          if row && row['error']
+            failed << [document, row['error']]
+          else
+            document._id  = row['id']  if row && row['id']
+            document._rev = row['rev'] if row && row['rev']
+            document.send(:clear_changes_information) if document.respond_to?(:clear_changes_information, true)
+            saved << document
+          end
+        end
+
+        { saved: saved, invalid: invalid, failed: failed }
+      end
+
+      # Delete many persisted documents via _bulk_docs in one request.
+      # Returns the raw result rows; clears _id/_rev on the passed records.
+      def bulk_destroy(documents)
+        documents = Array(documents)
+        return [] if documents.empty?
+        payload = documents.map { |d| { '_id' => d._id, '_rev' => d._rev, '_deleted' => true } }
+        rows = Array(couchrest_database.bulk_save(payload))
+        documents.each { |d| d._id = nil; d._rev = nil }
+        rows
+      end
+
       def delete_document(document)
         couchrest_database.delete_doc document.to_hash
       end
