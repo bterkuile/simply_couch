@@ -141,10 +141,6 @@ module SimplyCouch
         end
       end
 
-      def respond_to_missing?(name, include_private = false)
-        name.to_s =~ /^(find_by|find_all_by|count_by)/ || super
-      end
-
       def _define_hard_delete_methods
         define_method("destroy!") do
           destroy(true)
