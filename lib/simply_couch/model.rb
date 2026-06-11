@@ -27,6 +27,7 @@ require 'simply_couch/model/has_one'
 require 'simply_couch/model/attachments'
 require 'simply_couch/model/pagination'
 require 'simply_couch/model/persistence'
+require 'simply_couch/model/bulk'
 require 'simply_couch/model/view'
 require 'simply_couch/model/views'
 require 'simply_couch/include_relation'
@@ -48,6 +49,7 @@ module SimplyCouch
     module ClassMethods
       include SimplyCouch::ClassMethods::Base
       include SimplyCouch::Model::Database
+      include SimplyCouch::Model::Bulk
       include SimplyCouch::Model::Validations
       include SimplyCouch::Model::BelongsTo
       include SimplyCouch::Model::EmbeddedIn
