@@ -5,6 +5,7 @@ module SimplyCouch
 
       def belongs_to(name, options = {})
         check_existing_properties(name, SimplyCouch::Model::BelongsTo::Property)
+        SimplyCouch.assert_safe_view_token!(self.to_s, name, soft_delete_attribute)
         association_property = if name.to_s.index('__')
                                  # Already defined properly
                                  name

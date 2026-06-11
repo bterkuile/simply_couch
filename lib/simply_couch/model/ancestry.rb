@@ -185,6 +185,7 @@ module SimplyCouch
           @ancestry_by_property
         end
         options = {order_by: :position}.merge(options)
+        SimplyCouch.assert_safe_view_token!(name, options[:by_property], options[:order_by])
         order_by = case options[:order_by]
                    when Symbol then "doc['#{options[:order_by]}']"
                    when Array then "[#{options[:order_by].map{|o| "doc['#{o}']"}.join(', ')}]"
