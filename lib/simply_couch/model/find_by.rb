@@ -102,6 +102,11 @@ module SimplyCouch
           view(without_deleted_view_name, key: without_deleted_view_keys)
         end
 
+        # Pre-define the matching count_by_* method so the generated finder's
+        # total_entries lookup (send(count_name, ...)) resolves to a real method
+        # instead of re-entering method_missing on first use.
+        _define_count_by(count_name, define_only: true) unless respond_to?(count_name)
+
         if raise_when_not_found
           (class << self; self end).instance_eval do
             define_method(:"#{name}!") do |*key_args|
@@ -159,7 +164,7 @@ module SimplyCouch
         end
       end
 
-      def _define_count_by(name, *args)
+      def _define_count_by(name, *args, define_only: false)
         keys = name.to_s.sub(/^count_by_/, "").split("_and_")
         view_name = name.to_s.sub(/^count_/, "").to_sym
         view_keys = keys.length == 1 ? keys.first : keys
@@ -195,7 +200,9 @@ module SimplyCouch
           end
         end
 
-        send(name, *args)
+        # define_only is used when another finder (find_all_by) just needs the
+        # method present; skip the immediate count query in that case.
+        send(name, *args) unless define_only
       end
     end
   end
