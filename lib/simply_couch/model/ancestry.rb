@@ -260,8 +260,8 @@ module SimplyCouch
         def build_tree(pages = nil)
           pages ||= all
           return pages if pages.empty? # Do not process empty array
-          @tree_wrapper = Struct.new(:children).new([]) # Dummy container as traversing begin, contains roots as children
-          old_tree_slice = @tree_wrapper.children
+          tree_wrapper = Struct.new(:children).new([]) # Dummy container as traversing begin, contains roots as children
+          old_tree_slice = tree_wrapper.children
           new_tree_slice = []
           pages.sort_by!{|p| [p.path_ids.size, p.position]}
           root_depth = pages.first.path_ids.size
@@ -290,7 +290,7 @@ module SimplyCouch
           end
 
           #TODO: setting @descendants from cache as option to avoid database call when descendants is required
-          @tree_wrapper.children
+          tree_wrapper.children
         end
 
         # Recursive set parents

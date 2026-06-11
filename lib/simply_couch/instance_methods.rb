@@ -5,6 +5,10 @@ module SimplyCouch
       blk.call(self) if blk
     end
     def ==(other)
+      # Unsaved records (no _id) only equal themselves — otherwise two distinct
+      # new instances would compare equal (both _id/_rev nil) and collide in
+      # Set/uniq/include?, which the associations rely on.
+      return equal?(other) if _id.nil?
       other.kind_of?(SimplyCouch::Model) && other._id == _id && other._rev == _rev
     end
 

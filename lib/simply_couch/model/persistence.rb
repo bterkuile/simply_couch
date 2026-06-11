@@ -66,7 +66,12 @@ module SimplyCouch
         super || (self.class == other.class && self._id.present? && self._id == other._id)
       end
       def eql?(other); self == other; end
-      def hash; _id.hash * (_id.hash.to_s.size ** 10) + _rev.hash; end
+      def hash
+        # Unsaved records hash by object identity to stay consistent with #==
+        # (two distinct new records are not equal, so must not be forced equal).
+        return super if _id.nil?
+        [self.class, _id, _rev].hash
+      end
       def reload; database.load id; end
 
       def inspect
