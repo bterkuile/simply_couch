@@ -105,7 +105,9 @@ module SimplyCouch
         # Pre-define the matching count_by_* method so the generated finder's
         # total_entries lookup (send(count_name, ...)) resolves to a real method
         # instead of re-entering method_missing on first use.
-        _define_count_by(count_name, define_only: true) unless respond_to?(count_name)
+        # NOTE: respond_to? returns true via respond_to_missing? even before
+        # the method is defined, so we must check method_defined? instead.
+        _define_count_by(count_name, define_only: true) unless method_defined?(count_name) || private_method_defined?(count_name)
 
         if raise_when_not_found
           (class << self; self end).instance_eval do
