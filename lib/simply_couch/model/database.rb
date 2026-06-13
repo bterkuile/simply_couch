@@ -146,6 +146,8 @@ module SimplyCouch
       end
 
       def bulk_load(ids)
+        ids = Array(ids).compact
+        return [] if ids.empty?
         response = couchrest_database.bulk_load ids
         docs = response['rows'].map{|row| row["doc"]}.compact
         docs.each{|doc| doc.database = self if doc.respond_to?(:database=) }
