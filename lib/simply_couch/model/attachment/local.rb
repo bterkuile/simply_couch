@@ -88,8 +88,8 @@ module SimplyCouch
             base.validate :"#{name}_content_type_must_be_allowed"
             base.define_method(:"#{name}_content_type_must_be_allowed") do
               fname = send(:"#{name}_file_name")
-              return if fname.blank?
               ctype = send(:"#{name}_content_type")
+              return if fname.blank? || ctype.blank?
               allowed = content_type.is_a?(Array) ? content_type : [content_type]
               unless allowed.any? { |t| ctype&.start_with?(t) || ctype == t }
                 errors.add(name, "must be one of: #{allowed.join(', ')}")
