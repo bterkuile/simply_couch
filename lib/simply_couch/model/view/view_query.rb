@@ -81,7 +81,21 @@ module SimplyCouch
           self.class.__updated_views
         end
 
+        # REVIEW(2026-06-20): stale=false forces CouchDB to wait for the view
+        # index to be current before returning results. This eliminates a race
+        # condition where a document is saved and immediately queried via a view
+        # that hasn't indexed it yet (CouchDB default is stale=ok).
+        #
+        # Trade-off: first query after a write is slower (CouchDB blocks until
+        # the incremental index update completes). For high-write scenarios,
+        # consider stale: 'update_after' (return current results, reindex async)
+        # and lean on smart caching (Redis) for hot-path consistency.
+        #
+        # Architecture note: every CouchDB view's map function runs on EVERY
+        # document save (incremental indexing). Views that are never queried
+        # still burn CPU on writes. Only define views that are actually needed.
         def query_view(parameters)
+          parameters[:stale] = false unless parameters.key?(:stale)
           if @list_name
             @database.connection.get CouchRest.paramify_url("/#{@database.name}/_design/#{@design_document_name}/_list/#{@list_name}/#{@view_name}", parameters)
           else
