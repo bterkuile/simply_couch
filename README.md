@@ -265,15 +265,59 @@ SimplyCouch.s3_defaults = {
 SimplyCouch.s3_defaults = Rails.application.credentials.s3
 ```
 
-## Architecture
+## Architecture — storage adapters
 
-SimplyCouch is designed to be **database-agnostic**. All CouchDB-specific calls are isolated in the persistence adapter — the model layer only speaks in terms of documents, views, and associations. This means:
+All storage calls go through a single backend-neutral contract,
+`SimplyCouch::Adapter`. The model layer (finders, persistence, associations,
+views) only ever talks to an adapter — it never names a driver. This means:
 
-- **Swap backends** without touching model code
-- **Test against in-memory CouchDB** via [RockingChair](https://github.com/jweiss/rocking_chair)
-- **Zero driver dependency** — your app brings its own CouchDB client
+- **Swap backends without touching model code.**
+- **Zero driver dependency in core** — `require 'simply_couch'` loads with no
+  CouchDB driver present. The driver is required lazily, only when its adapter
+  is first used.
+- **Each backend is a small plugin** that implements the contract and registers
+  itself.
 
-The adapter pattern is a work in progress. Today the default adapter is CouchRest; the architecture supports dropping in CouchBase or any CouchDB-compatible client.
+The default backend is **CouchDB via CouchRest** (`SimplyCouch::Adapters::CouchRest`).
+**Couchbase** ships as a separate gem, [`simply_couch-couchbase`](https://github.com/bterkuile/simply_couch-couchbase),
+which implements the same contract on the official `couchbase` SDK (KV + N1QL).
+
+```ruby
+# Gemfile — pick a backend driver:
+gem 'couchrest'            # default (CouchDB)
+# gem 'simply_couch-couchbase'  # Couchbase (SDK-based)
+
+# Select the backend (default is :couchrest):
+SimplyCouch.adapter = :couchrest
+SimplyCouch.database_url = "http://admin:pass@localhost:5984/my_app"
+```
+
+### Writing your own adapter
+
+Subclass `SimplyCouch::Adapter`, implement the contract
+(`save_document`, `load_document`, `destroy_document`, `bulk_save`,
+`bulk_load`, `bulk_destroy`, `view`, `first`, `create_database!`,
+`drop_database!`), translate your driver's errors to `SimplyCouch::Conflict` /
+`SimplyCouch::NotFound`, and register it:
+
+```ruby
+SimplyCouch.register_adapter(:mybackend,
+  "MyGem::Adapters::MyBackend",
+  require_path: "my_gem/adapters/my_backend")
+```
+
+Prove parity by running the shared examples shipped with this gem:
+
+```ruby
+require 'simply_couch/spec/support/adapter_contract' # or vendor the file
+RSpec.describe MyGem::Adapters::MyBackend do
+  it_behaves_like 'a simply_couch adapter'
+end
+```
+
+> CouchDB-native inline attachments (`has_couch_attached`) are a CouchDB feature
+> and require an adapter that exposes the raw driver. Portable apps should use
+> `has_local_attached` or `has_s3_attached`, which work on any backend.
 
 ## Dependencies
 

@@ -59,7 +59,7 @@ module SimplyCouch
         # Map to doc
         # Filter out errors, or none founds (compact)
         # Select the Couch objects
-        docs = database.couchrest_database.bulk_load(ids)['rows'].map{|r| r['doc']}.compact.select{|d| d.is_a?(SimplyCouch::Model)}
+        docs = database.bulk_load(ids).select{|d| d.is_a?(SimplyCouch::Model)}
         for doc in docs
           pairs.each_pair do |k, v|
             doc.send("#{k}=", v) if doc.respond_to?("#{k}=")

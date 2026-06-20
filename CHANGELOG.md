@@ -1,6 +1,28 @@
 Changelog
 =============
 
+0.2.0
+-----
+- Compartmentalize the storage backend behind a real adapter contract.
+  - New `SimplyCouch::Adapter` base class documents the backend-neutral surface
+    the model layer depends on (save/load/destroy/bulk/view + admin).
+  - The CouchDB implementation moved verbatim out of
+    `SimplyCouch::Model::DatabaseInstance` into `SimplyCouch::Adapters::CouchRest`
+    (a `DatabaseInstance` alias is kept for backwards compatibility).
+  - `couchrest` is now lazily required — `require 'simply_couch'` loads with **no
+    driver present**. The couchrest driver only loads when its adapter is first
+    used.
+  - Backends register themselves: `SimplyCouch.register_adapter(:name, "Class",
+    require_path: "...")`; select one with `SimplyCouch.adapter = :name`.
+  - Driver exceptions are translated to backend-neutral `SimplyCouch::Conflict` /
+    `SimplyCouch::NotFound`; the model/association/view layers no longer reach
+    through `database.couchrest_database`.
+  - New `SimplyCouch::DocumentCodec` rebuilds a model from a plain hash via the
+    `ruby_class` tag, so non-couchrest backends can hydrate documents.
+  - Shared `'a simply_couch adapter'` RSpec examples let any backend prove parity.
+  - No behaviour change for existing couchrest users; the full suite is green.
+  - The Couchbase backend ships separately as the `simply_couch-couchbase` gem.
+
 1.0.0
 -----
 - Added Contaiment validator

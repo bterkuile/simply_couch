@@ -1,8 +1,14 @@
 require 'active_model'
-
-CouchRest.decode_json_objects = true
 require 'json'
+# Hydrate parsed JSON back into model objects via the 'ruby_class' tag (see
+# Persistence::Json#json_create and SimplyCouch::DocumentCodec). Backend-neutral.
 JSON.create_id = 'ruby_class'
+
+# couchrest's own JSON-decode hook. The CouchRest adapter sets this when it
+# loads; we also set it eagerly here IF couchrest is already present, matching
+# the pre-adapter behaviour (core used to require couchrest at load) without
+# forcing the driver on backends that don't use it.
+CouchRest.decode_json_objects = true if defined?(CouchRest)
 
 require 'active_support'
 unless {}.respond_to?(:assert_valid_keys)
@@ -194,29 +200,14 @@ module SimplyCouch
       return [forced_reload, with_deleted, limit, descending, skip]
     end
 
+    # Design documents are a CouchDB concept; these rake helpers delegate to the
+    # configured adapter when it supports them (the couchrest backend does).
     def self.delete_all_design_documents(database)
-      db = CouchRest.database(database)
-      db.info # ensure DB exists
-      design_docs = CouchRest.get("#{database}/_all_docs?startkey=%22_design%22&endkey=%22_design0%22")['rows'].map do |row|
-        [row['id'], row['value']['rev']]
-      end
-      design_docs.each do |doc_id, rev|
-        db.delete_doc({'_id' => doc_id, '_rev' => rev})
-      end
-      design_docs.size
+      SimplyCouch.adapter_class.delete_all_design_documents(database)
     end
 
     def self.compact_all_design_documents(database)
-      db = CouchRest.database(database)
-      db.info # ensure DB exists
-      design_docs = CouchRest.get("#{database}/_all_docs?startkey=%22_design%22&endkey=%22_design0%22")['rows'].map do |row|
-        [row['id'], row['value']['rev']]
-      end
-      design_docs.each do |doc_id, rev|
-        puts "#{database}/_compact/#{doc_id.gsub("_design/",'')}"
-        CouchRest.post("#{database}/_compact/#{doc_id.gsub("_design/",'')}")
-      end
-      design_docs.size
+      SimplyCouch.adapter_class.compact_all_design_documents(database)
     end
 
   end
