@@ -5,7 +5,11 @@ class String
   end
 end
 
-unless defined?(SimplyCouch)
+# Guard on a sentinel that only this file defines (SimplyCouch::VERSION), not on
+# the bare SimplyCouch constant. A plugin gem (e.g. simply_couch-couchbase) may
+# open `module SimplyCouch` for its own version/namespace before this file loads;
+# guarding on the bare module would then skip the library's whole initialization.
+unless defined?(SimplyCouch::VERSION)
   $:<<(File.expand_path(File.dirname(__FILE__) + "/lib"))
   require 'simply_couch/instance_methods'
   require 'simply_couch/class_methods_base'
