@@ -399,7 +399,10 @@ module SimplyCouch
 
         public
         def cast_back(value)
-          value.respond_to?(:iso8601) ? value.iso8601 : value
+          return value unless value.respond_to?(:iso8601)
+          return value.utc.iso8601 if value.respond_to?(:utc)
+
+          value.iso8601
         end
 
         private
