@@ -348,7 +348,7 @@ module SimplyCouch
           base.class_eval do
             def self.revisions(ids)
               return [] if ids.empty?
-              database.couchrest_database.bulk_load(ids)
+              database.bulk_load(ids)
             end
           end
         end

@@ -16,16 +16,16 @@ RSpec.configure do |config|
   config.before(:each) do
     $performed_queries = []
     SimplyCouch::Model::View::ViewQuery.clear_cache
-    server = CouchRest.new(COUCHDB_URL)
-    begin
-      server.database(TEST_DB).delete!
-    rescue StandardError
-      # database doesn't exist or already deleted
-    end
-    begin; server.create_db(TEST_DB); rescue CouchRest::PreconditionFailed, CouchRest::PreconditionFailed, CouchRest::NotFound; end
-    SimplyCouch::Model::Database.class_eval do
+
     SimplyCouch.database_url = "#{COUCHDB_URL}/#{TEST_DB}"
+    SimplyCouch::Model::Database.class_eval do
       define_method(:couchrest_database_url) { "#{COUCHDB_URL}/#{TEST_DB}" }
     end
+
+    # Reset the test database through the adapter contract — the harness no
+    # longer talks to a driver directly, so it works for any backend.
+    db = SimplyCouch.database_for("#{COUCHDB_URL}/#{TEST_DB}")
+    db.drop_database!
+    db.create_database!
   end
 end

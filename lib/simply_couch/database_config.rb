@@ -29,6 +29,36 @@ module SimplyCouch
   mattr_accessor :database_url
   mattr_accessor :s3_defaults
 
+  # Selected storage backend. Defaults to :couchrest (CouchDB). Set to another
+  # registered adapter (e.g. :couchbase, provided by the simply_couch-couchbase
+  # gem) to swap the data backend without touching model code.
+  mattr_accessor :adapter
+  self.adapter = :couchrest
+
+  # Register a storage backend.
+  #   SimplyCouch.register_adapter(:couchbase,
+  #     "SimplyCouch::Adapters::Couchbase",
+  #     require_path: "simply_couch/adapters/couchbase")
+  # The class is required + resolved lazily on first use, so registering a
+  # backend never forces its driver to load.
+  def self.register_adapter(name, class_name, require_path: nil)
+    registered_adapters[name.to_sym] = { class_name: class_name, require_path: require_path }
+  end
+
+  def self.registered_adapters
+    @_registered_adapters ||= {}
+  end
+
+  # The concrete Adapter subclass for the configured backend.
+  def self.adapter_class
+    spec = registered_adapters.fetch(adapter.to_sym) do
+      raise SimplyCouch::Error, "unknown simply_couch adapter: #{adapter.inspect} " \
+        "(registered: #{registered_adapters.keys.inspect})"
+    end
+    require spec[:require_path] if spec[:require_path]
+    Object.const_get(spec[:class_name])
+  end
+
   # Load S3 defaults from a YAML config file with ERB support.
   #   SimplyCouch.load_s3_config(Rails.root.join('config', 's3.yml'))
   #
@@ -42,10 +72,11 @@ module SimplyCouch
     self.s3_defaults = (config[env] || {}).deep_symbolize_keys
   end
 
-  # Returns a DatabaseInstance for the given URL, caching by URL.
+  # Returns an adapter instance for the given URL, built from the configured
+  # backend and cached by URL.
   def self.database_for(url)
     return nil unless url
-    databases[url] ||= Model::DatabaseInstance.new(url)
+    databases[url] ||= adapter_class.new(url)
   end
 
   # Returns the effective default database (request-scoped or global).
@@ -81,3 +112,10 @@ module SimplyCouch
     database_for(ENV['COUCHDB_URL'] || 'http://127.0.0.1:5984/mozo_development')
   end
 end
+
+# Built-in backend. Lazily required on first use so core loads without couchrest.
+SimplyCouch.register_adapter(
+  :couchrest,
+  "SimplyCouch::Adapters::CouchRest",
+  require_path: "simply_couch/adapters/couch_rest"
+)

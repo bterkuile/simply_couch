@@ -6,7 +6,11 @@ module SimplyCouch
         attr_reader :reduce_function, :lib, :list_name, :list_function, :design_document, :view_name, :klass, :options, :language
         attr_accessor :view_parameters
 
-        private :klass, :options
+        # `klass` (the model) and `options` (the view declaration: :key, :conditions,
+        # :emit_value, :properties, …) are the structured, backend-neutral query
+        # description. The couchrest backend renders them to JS map/reduce; other
+        # backends (e.g. couchbase → N1QL) translate these fields instead of
+        # parsing the generated JavaScript. Public so adapters can read them.
 
         DEFAULT_LANGUAGE = :javascript
         DEFAULT_DIGEST_VIEW_NAMES = false

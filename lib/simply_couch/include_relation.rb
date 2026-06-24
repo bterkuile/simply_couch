@@ -104,9 +104,7 @@ class Array
         end
 
         # Get from the database
-        relation_objects = database.couchrest_database.bulk_load(keys.compact.uniq)
-        relation_objects = Array.wrap(relation_objects['rows']).map{|r| r['doc']}.compact if relation_objects.is_a?(Hash)
-        relation_objects ||= [] # Ensure array datatype
+        relation_objects = database.bulk_load(keys.compact.uniq)
         if followup # deeper nested including
           case followup
           when Hash
@@ -133,9 +131,7 @@ class Array
           relation_ids = relation_ids.flatten.compact.uniq
 
           # Get from the database
-          relation_objects = database.couchrest_database.bulk_load(relation_ids)
-          relation_objects = Array.wrap(relation_objects['rows']).map{|r| r['doc']}.compact if relation_objects.is_a?(Hash)
-          relation_objects ||= [] # Ensure array datatype
+          relation_objects = database.bulk_load(relation_ids)
           each do |obj|
             obj.instance_variable_set("@#{relation}", {all: relation_objects.select{|o| Array.wrap(obj.send(key)).include?(o.id)}})
           end
