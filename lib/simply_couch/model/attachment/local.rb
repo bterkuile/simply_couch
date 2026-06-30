@@ -227,7 +227,9 @@ module SimplyCouch
                         else
                           instance_variable_get(:"@_attachment_#{name}_tmp_token") || 'tmp'
                         end
-            "/system/#{name}/#{record_id}/#{style_name}#{ext}"
+            path = "/system/#{name}/#{record_id}/#{style_name}#{ext}"
+            host = ActionController::Base.asset_host
+            host ? "#{host}#{path}" : path
           end
 
           # ---- Backward compat: *_path derives from *_url ----
