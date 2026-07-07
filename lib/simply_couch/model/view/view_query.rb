@@ -81,11 +81,7 @@ module SimplyCouch
           self.class.__updated_views
         end
 
-        # update=true forces CouchDB to wait for the view index to be current
-        # before returning results. For high-write hot paths, override with
-        # stale: 'update_after' for current results + async reindex.
         def query_view(parameters)
-          parameters[:update] = true unless parameters.key?(:update)
           if @list_name
             @database.connection.get CouchRest.paramify_url("/#{@database.name}/_design/#{@design_document_name}/_list/#{@list_name}/#{@view_name}", parameters)
           else
