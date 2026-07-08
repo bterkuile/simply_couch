@@ -82,7 +82,15 @@ module SimplyCouch
 
         def process_results(results)
           processed = if count?
-                        results['rows'].first.try(:[], 'value') || 0
+                        # A grouped multi-key reduce (view_parameters[:group], used for
+                        # count queries with :keys) returns one row per matched key —
+                        # sum them all, rather than just the first, which silently
+                        # dropped every key but the first one's count.
+                        if view_parameters[:group]
+                          results['rows'].sum { |row| row['value'].to_i }
+                        else
+                          results['rows'].first.try(:[], 'value') || 0
+                        end
                       else
                         results['rows'].map {|row|
                           row['doc'] || (row['id'] unless view_parameters[:include_docs])

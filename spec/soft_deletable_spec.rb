@@ -332,6 +332,14 @@ RSpec.describe 'SoftDeletable' do
             expect(Hemorrhoid.find_all_by_nickname('Claas', with_deleted: true).map(&:id)).to eq [@hemorrhoid.id]
             expect(Hemorrhoid.find_all_by_nickname_and_size('Claas', 3, with_deleted: true).map(&:id)).to eq [@hemorrhoid.id]
           end
+
+          it 'excludes soft-deleted records and reports the correct total_entries with multi-key pagination' do
+            alice = Hemorrhoid.create(nickname: 'alice', size: 1)
+            bob = Hemorrhoid.create(nickname: 'bob', size: 1)
+            result = Hemorrhoid.find_all_by_nickname(keys: ['alice', 'bob', 'Claas', 'nobody'])
+            expect(result.map(&:id)).to match_array [alice.id, bob.id]
+            expect(result.total_entries).to eq 2
+          end
         end
 
         it 'reuses the same view - when find_all_by is called first' do

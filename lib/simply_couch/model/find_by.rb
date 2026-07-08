@@ -113,7 +113,8 @@ module SimplyCouch
           (class << self; self end).instance_eval do
             define_method(:"#{name}!") do |*key_args|
               options = key_args.last.is_a?(Hash) ? key_args.pop : {}
-              with_pagination_options(options.update(total_entries: send(count_name, *key_args))) do |options|
+              count_options = options[:keys] ? { keys: options[:keys] } : {}
+              with_pagination_options(options.update(total_entries: send(count_name, *key_args, **count_options))) do |options|
                 options.assert_valid_keys(:with_deleted, :limit, :skip, :keys)
                 with_deleted = options.delete(:with_deleted)
 
@@ -127,7 +128,11 @@ module SimplyCouch
                 key_args.map!{|a| a.is_a?(SimplyCouch::Model) ? a.id : a}
 
                 if soft_deleting_enabled? && !with_deleted
-                  options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+                  if options[:keys]
+                    options[:keys] = options[:keys].map { |k| Array.wrap(k) + [nil] } # deleted_at
+                  else
+                    options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+                  end
                   result = database.view(send(without_deleted_view_name, options))
                 else
                   result = database.view(send(view_name, options))
@@ -142,7 +147,8 @@ module SimplyCouch
           (class << self; self end).instance_eval do
             define_method(name) do |*key_args|
               options = key_args.last.is_a?(Hash) ? key_args.pop : {}
-              with_pagination_options(options.update(total_entries: send(count_name, *key_args))) do |options|
+              count_options = options[:keys] ? { keys: options[:keys] } : {}
+              with_pagination_options(options.update(total_entries: send(count_name, *key_args, **count_options))) do |options|
                 options.assert_valid_keys(:with_deleted, :limit, :skip, :keys)
                 with_deleted = options.delete(:with_deleted)
 
@@ -154,7 +160,11 @@ module SimplyCouch
                 raise ArgumentError, "Too many or too few arguments, require #{keys.inspect}" unless keys.size == key_args.size || options[:keys]
 
                 if soft_deleting_enabled? && !with_deleted
-                  options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+                  if options[:keys]
+                    options[:keys] = options[:keys].map { |k| Array.wrap(k) + [nil] } # deleted_at
+                  else
+                    options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+                  end
                   database.view(send(without_deleted_view_name, options))
                 else
                   database.view(send(view_name, options))
@@ -191,9 +201,17 @@ module SimplyCouch
             options[:key] = key_args.first if key_args.size == 1
             options[:key] = key_args if key_args.size > 1
             options[:reduce] = true
+            # CouchDB rejects reduce:true combined with multiple :keys unless
+            # grouped (each key reduces to its own row); process_results sums
+            # the grouped rows back into a single total.
+            options[:group] = true if options[:keys]
 
             if soft_deleting_enabled? && !with_deleted
-              options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+              if options[:keys]
+                options[:keys] = options[:keys].map { |k| Array.wrap(k) + [nil] } # deleted_at
+              else
+                options[:key] = Array.wrap(options[:key]) + [nil] # deleted_at
+              end
               database.view(send(without_deleted_view_name, options))
             else
               database.view(send(view_name, options))

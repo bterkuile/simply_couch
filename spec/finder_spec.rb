@@ -184,6 +184,14 @@ describe "Finder" do
         User.find_all_by_name(keys: ['john', 'doe', 'jane']).map(&:name).should match_array %w[doe john]
       end
 
+      it "reports total_entries scoped to the given keys, not the whole view" do
+        User.create name: 'john', title: 'Mr.'
+        User.create name: 'doe', title: 'Mr.'
+        User.create name: 'someone_else_entirely', title: 'Mr.'
+        result = User.find_all_by_name(keys: ['john', 'doe', 'jane'])
+        result.total_entries.should eq 2
+      end
+
       it "raise an error if the parameters don't match" do
         expect{ User.find_all_by_title() }.to raise_error ArgumentError
         expect{ User.find_all_by_title(1,2,3,4,5) }.to raise_error ArgumentError
